@@ -1,0 +1,1051 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBoS GEOAI | Gambia Urban Heat Island Intelligence</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
+
+<style>
+:root {
+ --bg:#eef2f6;
+ --panel:#ffffff;
+ --ink:#172536;
+ --muted:#738194;
+ --line:#dfe5ec;
+ --blue:#1769aa;
+ --cyan:#08a6bd;
+ --orange:#ed8b32;
+ --red:#d94b43;
+ --green:#23976b;
+}
+* {box-sizing:border-box}
+body {
+ margin:0;
+ background:var(--bg);
+ color:var(--ink);
+ font-family:Arial,Helvetica,sans-serif;
+ overflow:hidden;
+}
+header {
+ height:65px;
+ background:#102a43;
+ color:white;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:0 22px;
+ border-bottom:3px solid #20a4b5;
+}
+.brand {font-weight:800;font-size:17px;letter-spacing:.5px}
+.brand small {
+ display:block;
+ font-size:10px;
+ font-weight:400;
+ color:#b8d5e7;
+ margin-top:4px;
+}
+.header-right {font-size:11px;color:#d4e6f3;text-align:right}
+main {
+ height:calc(100vh - 65px);
+ display:grid;
+ grid-template-columns:1fr 1fr 1fr;
+ gap:9px;
+ padding:9px;
+}
+.panel {
+ background:var(--panel);
+ border:1px solid var(--line);
+ border-radius:7px;
+ min-width:0;
+ min-height:0;
+ overflow-y:auto;
+}
+.panel::-webkit-scrollbar {width:5px}
+.panel::-webkit-scrollbar-thumb {background:#bdc9d5;border-radius:5px}
+.section {
+ padding:14px;
+ border-bottom:1px solid var(--line);
+}
+.section-title {
+ font-size:11px;
+ font-weight:800;
+ letter-spacing:1px;
+ color:#536579;
+ margin-bottom:13px;
+}
+label {
+ display:block;
+ font-size:11px;
+ color:#536579;
+ font-weight:700;
+ margin:11px 0 5px;
+}
+select,input {
+ width:100%;
+ padding:10px;
+ background:#f8fafc;
+ border:1px solid #d8e0e9;
+ border-radius:4px;
+ color:#26394d;
+ font-size:12px;
+}
+button {
+ border:0;
+ border-radius:4px;
+ padding:10px 12px;
+ cursor:pointer;
+ font-weight:700;
+ font-size:11px;
+}
+.primary {background:#1769aa;color:white}
+.secondary {background:#e7edf4;color:#29445d}
+.buttons {display:flex;gap:7px;margin-top:15px}
+.buttons button {flex:1}
+#map {height:100%;width:100%;background:#e8eef1}
+.map-panel {
+ position:relative;
+ overflow:hidden;
+ display:flex;
+ flex-direction:column;
+}
+.map-heading {
+ background:#fff;
+ padding:12px 14px;
+ border-bottom:1px solid var(--line);
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ font-size:12px;
+ font-weight:800;
+}
+.map-wrap {flex:1;min-height:0;position:relative}
+.map-footer {
+ padding:8px 12px;
+ background:white;
+ border-top:1px solid var(--line);
+ font-size:10px;
+ color:#738194;
+}
+.kpis {
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px;
+}
+.kpi {
+ padding:12px;
+ background:#f4f8fb;
+ border:1px solid #e5ebf1;
+ border-radius:5px;
+ min-width:0;
+}
+.kpi .value {
+ font-size:21px;
+ font-weight:800;
+ color:#1769aa;
+ margin:7px 0 3px;
+ overflow-wrap:anywhere;
+}
+.kpi .name {font-size:10px;color:#718196}
+.kpi .unit {font-size:9px;color:#8a98a8}
+.chartbox {height:205px;position:relative}
+.legend-row {
+ display:flex;
+ align-items:center;
+ gap:8px;
+ margin:9px 0;
+ font-size:11px;
+ color:#536579;
+}
+.swatch {width:19px;height:9px;border-radius:2px}
+.status {
+ font-size:10px;
+ color:#65778b;
+ background:#f1f5f9;
+ padding:9px;
+ border-radius:4px;
+ line-height:1.5;
+}
+.note {
+ background:#fff8e9;
+ color:#805c1c;
+ padding:10px;
+ font-size:10px;
+ line-height:1.6;
+ border-radius:4px;
+}
+.credits {
+ padding:15px;
+ color:#8390a0;
+ font-size:10px;
+ line-height:1.7;
+}
+.layer-row {
+ display:flex;
+ align-items:center;
+ gap:8px;
+ margin:11px 0;
+ font-size:11px;
+}
+.layer-row input {width:auto}
+#loading {
+ position:absolute;
+ z-index:1000;
+ top:12px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#102a43;
+ color:white;
+ padding:9px 15px;
+ border-radius:4px;
+ font-size:11px;
+ box-shadow:0 2px 8px #0003;
+}
+@media(max-width:900px) {
+ body {overflow:auto}
+ header {height:auto;min-height:65px}
+ main {
+  height:auto;
+  min-height:calc(100vh - 65px);
+  grid-template-columns:1fr;
+ }
+ .panel {min-height:450px}
+ .map-panel {height:600px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="brand">
+  GBoS GEOAI | SILKYGEO
+  <small>GAMBIA URBAN HEAT ISLAND INTELLIGENCE</small>
+ </div>
+ <div class="header-right">
+  GIS / CARTOGRAPHY UNIT<br>
+  THE GAMBIA • REMOTE SENSING
+ </div>
+</header>
+
+<main>
+
+<!-- LEFT PANEL -->
+<aside class="panel">
+
+ <div class="section">
+  <div class="section-title">01 | DATA & CONTROLS</div>
+
+  <div class="status" id="connection">
+   INITIALISING SATELLITE AND ADMINISTRATIVE DATA...
+  </div>
+
+  <label>Administrative level</label>
+  <select id="level">
+   <option value="national">National</option>
+   <option value="adm1">Region / LGA</option>
+   <option value="adm2">District</option>
+  </select>
+
+  <label>Region / LGA</label>
+  <select id="region">
+   <option value="">Loading regions...</option>
+  </select>
+
+  <label>District</label>
+  <select id="district">
+   <option value="">All districts</option>
+  </select>
+
+  <label>Satellite observation date</label>
+  <input type="date" id="date" value="2026-11-01"
+         min="2000-02-25">
+
+  <label>Satellite platform</label>
+  <select id="platform">
+   <option value="terra">MODIS Terra</option>
+  </select>
+
+  <label>Temperature observation</label>
+  <select id="temperature">
+   <option value="day">Daytime LST</option>
+   <option value="night">Nighttime LST</option>
+  </select>
+
+  <label>Map indicator</label>
+  <select id="indicator">
+   <option value="lst">Land Surface Temperature</option>
+   <option value="ndvi">Vegetation Index (NDVI)</option>
+   <option value="truecolor">Satellite True Colour</option>
+  </select>
+
+  <label>Basemap</label>
+  <select id="basemap">
+   <option value="street">Street</option>
+   <option value="satellite">Satellite</option>
+   <option value="terrain">Terrain</option>
+  </select>
+
+  <div class="buttons">
+   <button class="primary" id="run">RUN ANALYSIS</button>
+   <button class="secondary" id="reset">RESET</button>
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">02 | MAP LAYERS</div>
+
+  <div class="layer-row">
+   <input type="checkbox" id="boundaryToggle" checked>
+   Administrative boundaries
+  </div>
+
+  <div class="layer-row">
+   <input type="checkbox" id="heatToggle" checked>
+   Satellite thematic layer
+  </div>
+
+  <div class="layer-row">
+   <input type="checkbox" id="labelToggle">
+   Selected-area outline only
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">03 | ANALYTICAL FRAMEWORK</div>
+
+  <div class="status">
+   <b>Land Surface Temperature</b><br>
+   MODIS Terra daily LST, approximately 1 km.
+   <br><br>
+   <b>Urban Heat Island</b><br>
+   Urban versus rural thermal contrast. Requires
+   comparable urban and rural LST observations.
+   <br><br>
+   <b>Vegetation</b><br>
+   MODIS 8-day NDVI visualization.
+   <br><br>
+   <b>Built-up areas</b><br>
+   Urban land-cover interpretation and thermal
+   screening.
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">04 | DATA SOURCES</div>
+  <div class="status">
+   NASA MODIS Terra LST<br>
+   NASA Global Imagery Browse Services<br>
+   geoBoundaries administrative data<br>
+   Esri World Imagery / OpenStreetMap
+  </div>
+ </div>
+
+ <div class="credits">
+  Produced by Ansu Singhateh<br>
+  GIS Analyst | GIS / Cartography Unit<br>
+  Gambia Bureau of Statistics<br>
+  GBoS GEOAI • Research and educational use
+ </div>
+
+</aside>
+
+<!-- CENTRE PANEL -->
+<section class="panel map-panel">
+
+ <div class="map-heading">
+  <span>INTERACTIVE GEOSPATIAL MAP</span>
+  <span id="mapArea">THE GAMBIA</span>
+ </div>
+
+ <div class="map-wrap">
+  <div id="loading">Loading geospatial data...</div>
+  <div id="map" style="height:100%;width:100%"></div>
+ </div>
+
+ <div class="map-footer">
+  WGS 84 | EPSG:4326 | NASA GIBS | Interactive satellite mapping
+ </div>
+
+</section>
+
+<!-- RIGHT PANEL -->
+<aside class="panel">
+
+ <div class="section">
+  <div class="section-title">05 | SELECTED AREA INDICATORS</div>
+
+  <div class="kpis">
+
+   <div class="kpi">
+    <div class="name">SELECTED AREA</div>
+    <div class="value" id="areaName" style="font-size:14px">National</div>
+    <div class="unit">Administrative selection</div>
+   </div>
+
+   <div class="kpi">
+    <div class="name">LAND AREA</div>
+    <div class="value" id="areaSize">--</div>
+    <div class="unit">km² (boundary geometry)</div>
+   </div>
+
+   <div class="kpi">
+    <div class="name">ADMINISTRATIVE FEATURES</div>
+    <div class="value" id="featureCount">--</div>
+    <div class="unit">Loaded boundary features</div>
+   </div>
+
+   <div class="kpi">
+    <div class="name">OBSERVATION DATE</div>
+    <div class="value" id="obsDate" style="font-size:15px">--</div>
+    <div class="unit">Requested date</div>
+   </div>
+
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">06 | THERMAL ANALYSIS</div>
+
+  <div class="kpis">
+   <div class="kpi">
+    <div class="name">LAND SURFACE TEMPERATURE</div>
+    <div class="value">Raster</div>
+    <div class="unit">NASA MODIS LST overlay</div>
+   </div>
+   <div class="kpi">
+    <div class="name">UHI INTENSITY</div>
+    <div class="value">Pending</div>
+    <div class="unit">Requires urban-rural pixel statistics</div>
+   </div>
+   <div class="kpi">
+    <div class="name">HEAT HOTSPOTS</div>
+    <div class="value">Pending</div>
+    <div class="unit">Requires raster threshold analysis</div>
+   </div>
+   <div class="kpi">
+    <div class="name">POPULATION EXPOSURE</div>
+    <div class="value">Pending</div>
+    <div class="unit">Requires population raster overlay</div>
+   </div>
+  </div>
+
+  <div class="note" style="margin-top:12px">
+   The map displays NASA satellite imagery. The
+   temperature, hotspot, and exposure indicators are
+   not reported as measured statistics until the
+   underlying raster pixels have been processed.
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">07 | SATELLITE INDICATOR LEGEND</div>
+
+  <div id="legend">
+   <div class="legend-row">
+    <span class="swatch" style="background:#d94b43"></span>
+    High-temperature colour range
+   </div>
+   <div class="legend-row">
+    <span class="swatch" style="background:#ed8b32"></span>
+    Intermediate-high temperature
+   </div>
+   <div class="legend-row">
+    <span class="swatch" style="background:#e9d45c"></span>
+    Intermediate temperature
+   </div>
+   <div class="legend-row">
+    <span class="swatch" style="background:#23976b"></span>
+    Lower-temperature colour range
+   </div>
+   <div class="status">
+    Indicative legend only. Actual image colours are
+    controlled by NASA GIBS rendering.
+   </div>
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">08 | ADMINISTRATIVE AREA COMPARISON</div>
+  <div class="chartbox">
+   <canvas id="areaChart"></canvas>
+  </div>
+  <div class="status">
+   Comparison of administrative land areas calculated
+   from the loaded boundary geometries. This is not
+   a temperature comparison.
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">09 | METHODOLOGY</div>
+  <div class="status">
+   1. Load national administrative boundaries.<br>
+   2. Select an administrative area.<br>
+   3. Display the NASA MODIS thermal layer.<br>
+   4. Examine vegetation and surface patterns.<br>
+   5. Calculate urban-rural LST differences using
+   the underlying raster data.<br>
+   6. Identify thermal hotspots and estimate
+   population exposure after raster processing.
+  </div>
+ </div>
+
+ <div class="section">
+  <div class="section-title">10 | EXPORTS</div>
+  <div class="buttons">
+   <button class="primary" id="exportGeo">EXPORT SELECTED GEOJSON</button>
+   <button class="secondary" id="exportCSV">EXPORT AREA CSV</button>
+  </div>
+ </div>
+
+ <div class="credits">
+  GBoS GEOAI | Gambia Urban Heat Island Intelligence<br>
+  Remote sensing and spatial analytical framework
+ </div>
+
+</aside>
+
+</main>
+
+<script>
+/* ==========================================================
+   GAMBIA UHI INTELLIGENCE
+   Administrative boundaries + NASA GIBS imagery
+========================================================== */
+
+const GAMBIA = [
+ [ -16.85,13.80],
+ [ -13.78,13.80],
+ [ -13.78,13.00],
+ [ -16.85,13.00]
+];
+
+const map = L.map('map',{
+ center:[13.45,-15.40],
+ zoom:8,
+ zoomControl:true
+});
+
+const basemaps = {
+ street:L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19,attribution:'© OpenStreetMap'}
+ ),
+ satellite:L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19,attribution:'© Esri'}
+ ),
+ terrain:L.tileLayer(
+  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  {maxZoom:17,attribution:'© OpenTopoMap'}
+ )
+};
+
+let currentBase=basemaps.satellite.addTo(map);
+let adm1Data=null;
+let adm2Data=null;
+let boundaryLayer=null;
+let selectedLayer=null;
+let heatLayer=null;
+let selectedFeature=null;
+let chart=null;
+
+const $=id=>document.getElementById(id);
+
+function setStatus(message){
+ $('connection').textContent=message;
+}
+
+function cleanName(f){
+ const p=f.properties||{};
+ const keys=[
+  'shapeName','shapeNameAlt','name',
+  'NAME_1','NAME_2','ADM1_NAME',
+  'ADM2_NAME','admin1Name','admin2Name'
+ ];
+ for(const k of keys){
+  if(p[k]) return String(p[k]);
+ }
+ return 'Unnamed area';
+}
+
+function getAreaKm2(feature){
+ try{
+  return turf.area(feature)/1000000;
+ }catch(e){return 0}
+}
+
+function getFeatureCollection(data){
+ if(data.type==='FeatureCollection') return data;
+ if(data.type==='Feature') return {
+  type:'FeatureCollection',
+  features:[data]
+ };
+ throw new Error('Unsupported boundary format');
+}
+
+/* Download boundary GeoJSON from geoBoundaries */
+
+async function loadBoundary(level){
+ const url='https://www.geoboundaries.org/api/current/gbOpen/GMB/'+level+'/';
+
+ const response=await fetch(url);
+ if(!response.ok) throw new Error('Boundary API error: '+response.status);
+
+ const metadata=await response.json();
+ const geoUrl=metadata.gjDownloadURL;
+
+ if(!geoUrl) throw new Error('GeoJSON download URL missing');
+
+ const geoResponse=await fetch(geoUrl);
+ if(!geoResponse.ok) throw new Error('GeoJSON download failed');
+
+ return getFeatureCollection(await geoResponse.json());
+}
+
+function styleBoundary(){
+ return {
+  color:'#1769aa',
+  weight:1.1,
+  fillColor:'#55a7ce',
+  fillOpacity:0.04
+ };
+}
+
+function renderBoundaries(){
+ if(boundaryLayer) map.removeLayer(boundaryLayer);
+
+ const level=$('level').value;
+ const data=level==='adm1'?adm1Data:adm2Data;
+
+ if(!data) return;
+
+ boundaryLayer=L.geoJSON(data,{
+  style:styleBoundary,
+  onEachFeature:(feature,layer)=>{
+   layer.bindTooltip(cleanName(feature),{sticky:true});
+   layer.on('click',()=>{
+    if(level==='adm1'){
+     $('region').value=cleanName(feature);
+    }else{
+     const parent=feature.properties||{};
+     $('district').value=cleanName(feature);
+    }
+    updateSelection();
+   });
+  }
+ }).addTo(map);
+
+ if(!$('boundaryToggle').checked){
+  map.removeLayer(boundaryLayer);
+ }
+}
+
+function populateRegions(){
+ const select=$('region');
+ select.innerHTML='<option value="">All regions</option>';
+
+ adm1Data.features.forEach(f=>{
+  const name=cleanName(f);
+  const option=document.createElement('option');
+  option.value=name;
+  option.textContent=name;
+  select.appendChild(option);
+ });
+}
+
+function populateDistricts(){
+ const select=$('district');
+ const region=$('region').value;
+
+ select.innerHTML='<option value="">All districts</option>';
+
+ if(!adm2Data) return;
+
+ let features=adm2Data.features;
+
+ if(region){
+  features=features.filter(f=>{
+   const p=f.properties||{};
+   const parent=String(
+    p.shapeGroup||p.ADM1_NAME||p.shapeNameAlt||''
+   ).toLowerCase();
+   return parent===region.toLowerCase() ||
+    JSON.stringify(p).toLowerCase().includes(region.toLowerCase());
+  });
+ }
+
+ features.forEach(f=>{
+  const option=document.createElement('option');
+  option.value=cleanName(f);
+  option.textContent=cleanName(f);
+  select.appendChild(option);
+ });
+}
+
+function getSelection(){
+ const level=$('level').value;
+ const region=$('region').value;
+ const district=$('district').value;
+
+ if(level==='national') return null;
+
+ if(level==='adm1' && region){
+  return adm1Data.features.find(
+   f=>cleanName(f)===region
+  )||null;
+ }
+
+ if(level==='adm2' && district){
+  return adm2Data.features.find(
+   f=>cleanName(f)===district
+  )||null;
+ }
+
+ if(level==='adm2' && region){
+  const features=adm2Data.features.filter(f=>{
+   const p=f.properties||{};
+   return JSON.stringify(p).toLowerCase()
+    .includes(region.toLowerCase());
+  });
+  if(features.length){
+   return {
+    type:'Feature',
+    properties:{shapeName:region},
+    geometry:{
+     type:'GeometryCollection',
+     geometries:features.map(f=>f.geometry)
+    }
+   };
+  }
+ }
+
+ return null;
+}
+
+function updateSelection(){
+ const feature=getSelection();
+ selectedFeature=feature;
+
+ if(selectedLayer) map.removeLayer(selectedLayer);
+
+ if(feature){
+  selectedLayer=L.geoJSON(feature,{
+   style:{
+    color:'#ed6c27',
+    weight:3,
+    fillColor:'#f6a34b',
+    fillOpacity:0.08
+   }
+  }).addTo(map);
+
+  try{
+   map.fitBounds(selectedLayer.getBounds(),{
+    padding:[20,20],
+    maxZoom:12
+   });
+  }catch(e){}
+ }else{
+  map.fitBounds([[13.00,-16.85],[13.80,-13.78]]);
+ }
+
+ const areaName=feature?cleanName(feature):'National';
+
+ let area=0;
+
+ if(feature){
+  area=getAreaKm2(feature);
+ }else if(adm1Data){
+  area=adm1Data.features.reduce(
+   (s,f)=>s+getAreaKm2(f),0
+  );
+ }
+
+ $('areaName').textContent=areaName;
+ $('areaSize').textContent=area.toLocaleString(
+  'en-US',{maximumFractionDigits:1}
+ );
+
+ $('featureCount').textContent=feature?'1':
+  (adm1Data?adm1Data.features.length:'--');
+
+ $('mapArea').textContent=areaName.toUpperCase();
+
+ renderBoundaries();
+ updateAreaChart();
+}
+
+/* NASA GIBS imagery */
+
+function makeHeatLayer(){
+ if(heatLayer) map.removeLayer(heatLayer);
+
+ const date=$('date').value;
+ const indicator=$('indicator').value;
+ const temperature=$('temperature').value;
+
+ let layerName='';
+ let format='image/png';
+
+ if(indicator==='lst'){
+  layerName=temperature==='day'
+   ?'MODIS_Terra_L3_Land_Surface_Temp_Daily_Day'
+   :'MODIS_Terra_L3_Land_Surface_Temp_Daily_Night';
+ }else if(indicator==='ndvi'){
+  layerName='MODIS_Terra_NDVI_8Day';
+ }else{
+  layerName='MODIS_Terra_CorrectedReflectance_TrueColor';
+  format='image/jpeg';
+ }
+
+ heatLayer=L.tileLayer.wms(
+  'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi',{
+   layers:layerName,
+   format:format,
+   transparent:format==='image/png',
+   version:'1.1.1',
+   time:date,
+   styles:'',
+   attribution:'NASA GIBS / MODIS Terra',
+   opacity:0.85
+  }
+ );
+
+ if($('heatToggle').checked){
+  heatLayer.addTo(map);
+ }
+
+ $('obsDate').textContent=date;
+}
+
+function changeBase(){
+ const choice=$('basemap').value;
+
+ if(currentBase) map.removeLayer(currentBase);
+
+ currentBase=basemaps[choice];
+ currentBase.addTo(map);
+
+ if(boundaryLayer && $('boundaryToggle').checked)
+  boundaryLayer.bringToFront();
+
+ if(selectedLayer) selectedLayer.bringToFront();
+}
+
+/* Administrative area chart */
+
+function updateAreaChart(){
+ if(!adm1Data) return;
+
+ const features=adm1Data.features;
+ const labels=features.map(cleanName);
+ const values=features.map(f=>getAreaKm2(f));
+
+ const ctx=$('areaChart').getContext('2d');
+
+ if(chart) chart.destroy();
+
+ chart=new Chart(ctx,{
+  type:'bar',
+  data:{
+   labels:labels,
+   datasets:[{
+    label:'Land area (km²)',
+    data:values,
+    backgroundColor:'#2596be',
+    borderRadius:3
+   }]
+  },
+  options:{
+   indexAxis:'y',
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{
+    legend:{display:false}
+   },
+   scales:{
+    x:{
+     beginAtZero:true,
+     title:{
+      display:true,
+      text:'Area (km²)'
+     }
+    },
+    y:{
+     ticks:{font:{size:9}}
+    }
+   }
+  }
+ });
+}
+
+/* Run analysis */
+
+async function runAnalysis(){
+ try{
+  $('loading').style.display='block';
+  $('loading').textContent='Updating satellite imagery...';
+
+  makeHeatLayer();
+  updateSelection();
+
+  setStatus(
+   'Boundaries loaded. Satellite layer requested from NASA GIBS.'
+  );
+
+ }catch(e){
+  setStatus('Analysis error: '+e.message);
+ }finally{
+  $('loading').style.display='none';
+ }
+}
+
+/* Export selected boundary */
+
+function downloadFile(data,filename,type){
+ const blob=new Blob([data],{type:type});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;
+ a.download=filename;
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+$('exportGeo').onclick=()=>{
+ const feature=selectedFeature;
+
+ if(!feature){
+  alert('Select a region or district first.');
+  return;
+ }
+
+ downloadFile(
+  JSON.stringify(feature,null,2),
+  'Gambia_Selected_UHI_Area.geojson',
+  'application/geo+json'
+ );
+};
+
+$('exportCSV').onclick=()=>{
+ const feature=selectedFeature;
+ const name=feature?cleanName(feature):'The Gambia';
+ const area=feature?getAreaKm2(feature):
+  adm1Data.features.reduce((s,f)=>s+getAreaKm2(f),0);
+
+ const csv=[
+  'Area,Area_km2,Observation_Date,Indicator',
+  '"'+name+'",'+area.toFixed(2)+',"'+
+  $('date').value+'","'+$('indicator').value+'"'
+ ].join('\n');
+
+ downloadFile(csv,'Gambia_UHI_Area_Summary.csv','text/csv');
+};
+
+/* Events */
+
+$('run').onclick=runAnalysis;
+
+$('reset').onclick=()=>{
+ $('level').value='national';
+ $('region').value='';
+ $('district').value='';
+ $('indicator').value='lst';
+ $('temperature').value='day';
+ $('basemap').value='satellite';
+ $('date').value='2026-11-01';
+
+ populateDistricts();
+ changeBase();
+ runAnalysis();
+};
+
+$('level').onchange=()=>{
+ populateDistricts();
+ updateSelection();
+};
+
+$('region').onchange=()=>{
+ populateDistricts();
+ updateSelection();
+};
+
+$('district').onchange=updateSelection;
+
+$('basemap').onchange=changeBase;
+
+$('boundaryToggle').onchange=()=>{
+ if(!boundaryLayer) return;
+ if($('boundaryToggle').checked)
+  boundaryLayer.addTo(map);
+ else
+  map.removeLayer(boundaryLayer);
+};
+
+$('heatToggle').onchange=()=>{
+ if(!heatLayer) return;
+ if($('heatToggle').checked)
+  heatLayer.addTo(map);
+ else
+  map.removeLayer(heatLayer);
+};
+
+$('labelToggle').onchange=()=>{
+ if(selectedLayer){
+  if($('labelToggle').checked)
+   selectedLayer.addTo(map);
+  else
+   map.removeLayer(selectedLayer);
+ }
+};
+
+$('indicator').onchange=runAnalysis;
+$('temperature').onchange=runAnalysis;
+
+/* Initialisation */
+
+async function initialise(){
+ try{
+  setStatus('Downloading Gambia administrative boundaries...');
+
+  const results=await Promise.all([
+   loadBoundary('ADM1'),
+   loadBoundary('ADM2')
+  ]);
+
+  adm1Data=results[0];
+  adm2Data=results[1];
+
+  populateRegions();
+  populateDistricts();
+
+  renderBoundaries();
+  updateSelection();
+
+  makeHeatLayer();
+
+  $('loading').style.display='none';
+
+  setStatus(
+   'CONNECTED | Gambia administrative boundaries loaded. '+
+   'NASA GIBS satellite imagery enabled.'
+  );
+
+ }catch(error){
+  $('loading').textContent='BOUNDARY LOADING ERROR';
+  setStatus('Boundary loading error: '+error.message);
+  console.error(error);
+ }
+}
+
+initialise();
+
+</script>
+</body>
+</html>
