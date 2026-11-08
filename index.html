@@ -4,100 +4,192 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SILKYSINGZ GEOAI | GAMBIA URBAN HEAT ISLAND INTELLIGENCE</title>
+<title>GBoS GEOAI | Gambia Urban Heat Island Intelligence</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
 
 <style>
 :root{
- --navy:#10243a;--blue:#1769aa;--cyan:#00a6c7;
- --green:#16865b;--orange:#e58a25;--red:#d84b4b;
- --bg:#eef2f6;--border:#dce3eb;--text:#233447;--muted:#708094;
+ --green:#14532d;
+ --dark:#123c32;
+ --light:#f1f5f9;
+ --border:#dbe4e0;
+ --text:#1e293b;
+ --muted:#64748b;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{
- background:linear-gradient(110deg,#10243a,#164e77);
- color:white;padding:15px 20px;min-height:76px;
- display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap
+body{
+ margin:0;
+ font-family:Arial,Helvetica,sans-serif;
+ background:var(--light);
+ color:var(--text);
 }
-.brand h1{font-size:19px;margin:0 0 5px}
-.brand p{font-size:11px;color:#d1e5f5;margin:0}
-.header-right{text-align:right;font-size:11px;color:#d9e8f5}
-.status-pill{display:inline-block;padding:6px 10px;border-radius:20px;background:#ffffff20;margin-top:5px}
-main{
- display:grid;grid-template-columns:minmax(260px,1fr) minmax(350px,1fr) minmax(260px,1fr);
- gap:10px;padding:10px;height:calc(100vh - 118px);min-height:600px
+header{
+ background:var(--dark);
+ color:white;
+ padding:15px 20px;
+}
+header h1{font-size:20px;margin:0 0 5px}
+header p{font-size:12px;margin:0;color:#d1e7dd}
+.dashboard{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
+ gap:10px;
+ padding:10px;
+ height:calc(100vh - 91px);
+ min-height:650px;
 }
 .panel{
- background:white;border:1px solid var(--border);border-radius:8px;
- display:flex;flex-direction:column;min-width:0;overflow:hidden
+ background:white;
+ border:1px solid var(--border);
+ border-radius:9px;
+ padding:13px;
+ overflow-y:auto;
+ min-height:0;
 }
-.panel-heading{
- padding:12px 14px;background:#f8fafc;border-bottom:1px solid var(--border);
- font-size:13px;font-weight:bold;color:var(--navy);flex-shrink:0
+.map-panel{min-width:0;min-height:0;position:relative}
+#map{
+ height:100%;
+ width:100%;
+ min-height:550px;
+ border-radius:8px;
+ background:#e5e7eb;
 }
-.panel-body{padding:13px;overflow-y:auto;flex:1;min-height:0}
-.section-title{
- font-size:11px;font-weight:bold;color:#42617d;text-transform:uppercase;
- letter-spacing:.5px;margin:16px 0 9px
+h3{
+ font-size:13px;
+ color:var(--green);
+ margin:5px 0 12px;
 }
-.section-title:first-child{margin-top:0}
-label{display:block;font-size:11px;font-weight:bold;margin:9px 0 5px;color:#465b70}
-select,input[type=url]{
- width:100%;padding:9px;border:1px solid #ccd6e0;border-radius:5px;
- background:white;color:#233447;font-size:12px
+h4{
+ font-size:11px;
+ color:#334155;
+ margin:14px 0 7px;
 }
-button{border:0;border-radius:5px;padding:9px 12px;cursor:pointer;font-size:11px;font-weight:bold}
-.primary{background:var(--blue);color:white}
-.secondary{background:#e9eff5;color:#29465e}
-.success{background:var(--green);color:white}
-.button-row{display:flex;gap:7px;margin-top:10px}
-.button-row button{flex:1}
-.small-note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:7px}
-.status-box{
- background:#f1f6fa;border:1px solid #dce7f0;padding:9px;
- border-radius:5px;font-size:11px;line-height:1.5;margin-top:9px;overflow-wrap:anywhere
+label{
+ display:block;
+ font-size:11px;
+ font-weight:bold;
+ margin:12px 0 5px;
 }
-.status-box.error{background:#fff2f1;border-color:#f1c7c3;color:#9f3530}
-.status-box.good{background:#edf8f2;border-color:#c9e8d5;color:#17613d}
-.check-row{display:flex;gap:8px;align-items:center;font-size:11px;margin:9px 0}
-#map{height:100%;width:100%;background:#dce6ec}
-.map-panel{position:relative}
-.map-toolbar{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border);flex-shrink:0}
-.map-toolbar select{flex:1}
-.map-container{position:relative;flex:1;min-height:0}
-.map-status{
- position:absolute;z-index:800;top:10px;left:10px;background:#ffffffed;
- padding:7px 10px;border-radius:5px;box-shadow:0 1px 5px #0002;
- font-size:10px;max-width:80%
+select,button{
+ width:100%;
+ padding:10px;
+ border:1px solid #cbd5e1;
+ border-radius:6px;
+ font-size:12px;
+ background:white;
+ color:var(--text);
 }
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kpi{border:1px solid var(--border);border-radius:7px;padding:10px;background:white;min-width:0}
-.kpi .name{font-size:10px;color:var(--muted);margin-bottom:7px}
-.kpi .value{font-size:21px;font-weight:bold;color:var(--navy);overflow-wrap:anywhere}
-.kpi .unit{font-size:10px;color:var(--muted);margin-top:3px}
-.chart-box{height:205px;position:relative;margin:12px 0 18px}
-.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:10px}
-.legend span{display:flex;align-items:center;gap:5px}
-.swatch{width:12px;height:12px;border-radius:2px;display:inline-block}
-.progress{height:7px;background:#e5ebf1;border-radius:10px;overflow:hidden;margin-top:7px}
-.progress div{height:100%;width:0;background:var(--blue);transition:width .2s}
+button{
+ border:0;
+ background:#166534;
+ color:white;
+ font-weight:bold;
+ cursor:pointer;
+ margin-top:9px;
+}
+button:hover{background:#14532d}
+button.secondary{background:#475569}
+button:disabled{opacity:.5;cursor:not-allowed}
+.status{
+ background:#f1f5f9;
+ border:1px solid #e2e8f0;
+ border-radius:6px;
+ padding:10px;
+ font-size:11px;
+ line-height:1.6;
+ margin-top:10px;
+ overflow-wrap:anywhere;
+}
+.kpi-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px;
+}
+.kpi{
+ background:#f8fafc;
+ border:1px solid #e2e8f0;
+ border-radius:7px;
+ padding:10px;
+ min-width:0;
+}
+.kpi small{
+ display:block;
+ color:var(--muted);
+ font-size:10px;
+ line-height:1.4;
+}
+.kpi strong{
+ display:block;
+ font-size:15px;
+ margin-top:5px;
+ overflow-wrap:anywhere;
+}
+.kpi.wide{grid-column:1/-1}
+.note{
+ font-size:10px;
+ line-height:1.6;
+ color:var(--muted);
+}
+.description{
+ font-size:11px;
+ line-height:1.6;
+ color:#475569;
+ background:#f8fafc;
+ border:1px solid #e2e8f0;
+ border-radius:7px;
+ padding:10px;
+}
+.legend-row{
+ display:flex;
+ align-items:center;
+ gap:8px;
+ font-size:10px;
+ margin:7px 0;
+ color:#475569;
+}
+.swatch{
+ width:24px;
+ height:12px;
+ border-radius:3px;
+ flex-shrink:0;
+ border:1px solid #cbd5e1;
+}
+.chart-box{
+ width:100%;
+ height:230px;
+ position:relative;
+ margin:8px 0 16px;
+}
+.chart-box.tall{height:270px}
+.chart-caption{
+ font-size:10px;
+ color:var(--muted);
+ line-height:1.5;
+ margin:5px 0 10px;
+}
+hr{border:0;border-top:1px solid #e2e8f0;margin:15px 0}
 footer{
- min-height:42px;background:#10243a;color:#d9e8f5;display:flex;
- justify-content:space-between;align-items:center;padding:8px 18px;
- font-size:10px;gap:10px;flex-wrap:wrap
+ text-align:center;
+ padding:10px;
+ color:#64748b;
+ font-size:10px;
+ background:white;
+ line-height:1.6;
 }
-#fileInput{display:none}
-@media(max-width:900px){
- main{height:auto;min-height:0;grid-template-columns:1fr}
- .panel{min-height:420px}
- .map-panel{height:520px}
+.badge{
+ display:inline-block;
+ background:#dcfce7;
+ color:#166534;
+ border-radius:20px;
+ padding:4px 8px;
+ font-size:10px;
+ margin-bottom:8px;
+}
+@media(max-width:1050px){
+ .dashboard{grid-template-columns:1fr;height:auto}
+ .panel{max-height:none}
+ #map{height:65vh;min-height:450px}
 }
 </style>
 </head>
@@ -105,1543 +197,1556 @@ footer{
 <body>
 
 <header>
- <div class="brand">
-  <h1>SILKYSINGZ GEOAI | GAMBIA URBAN HEAT ISLAND INTELLIGENCE</h1>
-  <p>Satellite Remote Sensing • Land Surface Temperature • Vegetation • Built-up Environment</p>
- </div>
- <div class="header-right">
-  GIS / Cartography Unit<br>
-  <span class="status-pill" id="headerStatus">Initialising...</span>
- </div>
+ <h1>GBoS GEOAI | Gambia Urban Heat Island Intelligence</h1>
+ <p>Sentinel-2 Satellite Indices • Administrative Geography • Spatial Intelligence</p>
 </header>
 
-<main>
+<main class="dashboard">
 
-<!-- LEFT: CONTROLS -->
+<!-- ======================================================
+     LEFT COLUMN: CONTROLS
+====================================================== -->
 <section class="panel">
- <div class="panel-heading">CONTROLS & ACTIVE ANALYSIS LAYER</div>
- <div class="panel-body">
 
-  <div class="section-title">Census boundary JSON</div>
+<h3>1. ADMINISTRATIVE AREA SELECTION</h3>
 
-  <label>Public JSON URL</label>
-  <input type="url" id="jsonUrl" value=""
-   placeholder="Paste your GitHub Raw JSON URL here">
+<label>Region</label>
+<select id="regionSelect" disabled>
+<option value="">Loading boundaries...</option>
+</select>
 
-  <div class="button-row">
-   <button class="primary" id="loadUrlBtn">Load JSON URL</button>
-   <button class="secondary" id="uploadBtn">Upload JSON file</button>
-  </div>
+<label>LGA</label>
+<select id="lgaSelect" disabled>
+<option value="">All LGAs</option>
+</select>
 
-  <input type="file" id="fileInput" accept=".json,.geojson,application/json,application/geo+json">
+<label>District</label>
+<select id="districtSelect" disabled>
+<option value="">All districts</option>
+</select>
 
-  <div class="small-note">
-   Accepts ordinary JSON files containing boundary features, GeoJSON FeatureCollections, or supported ArcGIS JSON structures. The filename can end in .json.
-  </div>
+<label>Ward</label>
+<select id="wardSelect" disabled>
+<option value="">All wards</option>
+</select>
 
-  <div id="dataStatus" class="status-box">
-   Upload your Census JSON file or enter its public URL.
-  </div>
+<label>Enumeration Area</label>
+<select id="eaSelect" disabled>
+<option value="">All enumeration areas</option>
+</select>
 
-  <div class="section-title">Geography selection</div>
+<div id="boundaryStatus" class="status">
+Connecting to GitHub JSON...
+</div>
 
-  <label>Region</label>
-  <select id="regionSelect" disabled><option value="">Waiting for JSON data</option></select>
+<button id="applyAreaBtn" disabled>RUN SELECTED AREA ANALYSIS</button>
+<button id="resetAreaBtn" class="secondary">RESET AREA SELECTION</button>
 
-  <label>LGA</label>
-  <select id="lgaSelect" disabled><option value="">All LGAs</option></select>
+<hr>
 
-  <label>District</label>
-  <select id="districtSelect" disabled><option value="">All districts</option></select>
+<h3>2. SENTINEL-2 SATELLITE PRODUCTS</h3>
 
-  <label>Ward</label>
-  <select id="wardSelect" disabled><option value="">All wards</option></select>
+<label>Satellite index / composite</label>
+<select id="layerSelect">
 
-  <label>Enumeration area</label>
-  <select id="eaSelect" disabled><option value="">All enumeration areas</option></select>
+<optgroup label="Sentinel-2 satellite indices">
+<option value="ndvi">NDVI — Vegetation health</option>
+<option value="ndviRaw">NDVI — Raw values</option>
+<option value="ndwi">NDWI — Water index</option>
+<option value="ndbi">NDBI — Built-up areas</option>
+<option value="ndmi">NDMI — Moisture condition</option>
+<option value="ndre">NDRE — Red-edge vegetation</option>
+<option value="ndviVre">NDVI — Red-edge only</option>
+<option value="nbr">NBR — Burn ratio</option>
+<option value="ndwiVre">NDWI — Red-edge version</option>
+</optgroup>
 
-  <div class="button-row">
-   <button class="primary" id="applyBtn">Apply selection</button>
-   <button class="secondary" id="resetBtn">Reset</button>
-  </div>
+<optgroup label="Sentinel-2 composites">
+<option value="agricultureDRA">Agriculture composite</option>
+<option value="infraredDRA">Colour infrared</option>
+<option value="swirDRA">Short-wave infrared</option>
+<option value="geologyDRA">Geology composite</option>
+<option value="naturalDRA">Sentinel-2 true colour</option>
+<option value="bathymetricDRA">Bathymetric composite</option>
+</optgroup>
 
-  <div class="section-title">Remote-sensing analysis</div>
+<optgroup label="Additional satellite products">
+<option value="natural">Natural colour — fixed stretch</option>
+<option value="agriculture">Agriculture — fixed stretch</option>
+<option value="geology">Geology — fixed stretch</option>
+<option value="swir">Short-wave infrared — fixed stretch</option>
+<option value="infrared">Colour infrared — fixed stretch</option>
+</optgroup>
 
-  <label>Selected analysis index</label>
-  <select id="layerSelect">
-   <option value="ndvi">NDVI – Vegetation Index</option>
-   <option value="ndwi">NDWI – Water Index</option>
-   <option value="ndmi">NDMI – Moisture Index</option>
-   <option value="ndbi">NDBI – Built-up Index</option>
-   <option value="savi">SAVI – Soil Adjusted Vegetation</option>
-   <option value="bsi">BSI – Bare Soil Index</option>
-   <option value="truecolor">Sentinel-2 True Colour</option>
-   <option value="falsecolor">Sentinel-2 False Colour</option>
-  </select>
+</select>
 
-  <label>Observation period</label>
-  <select id="dateRange">
-   <option value="2026-01-01/2026-11-08">2026 – Year to date</option>
-   <option value="2025-01-01/2025-12-31">2025</option>
-   <option value="2024-01-01/2024-12-31">2024</option>
-   <option value="2023-01-01/2023-12-31">2023</option>
-   <option value="2022-01-01/2022-12-31">2022</option>
-  </select>
+<label>Basemap</label>
+<select id="baseSelect">
+<option value="street">Street</option>
+<option value="satellite">Satellite</option>
+<option value="terrain">Terrain</option>
+</select>
 
-  <label>Maximum cloud cover</label>
-  <select id="cloudLimit">
-   <option value="10">10%</option>
-   <option value="20" selected>20%</option>
-   <option value="30">30%</option>
-   <option value="50">50%</option>
-  </select>
+<label>Satellite image opacity</label>
+<input id="opacity" type="range" min="0" max="100" value="100" style="width:100%">
 
-  <label>Sampling resolution</label>
-  <select id="sampleLimit">
-   <option value="250">250 m – faster</option>
-   <option value="100" selected>100 m – balanced</option>
-   <option value="50">50 m – detailed</option>
-  </select>
+<button id="loadImageBtn">LOAD SATELLITE IMAGE</button>
+<button id="resetMapBtn" class="secondary">RESET MAP VIEW</button>
 
-  <div class="button-row">
-   <button class="success" id="runBtn">Run index analysis</button>
-   <button class="secondary" id="cancelBtn">Cancel</button>
-  </div>
+<div id="imageStatus" class="status">
+Select an area and satellite layer.
+</div>
 
-  <div class="progress"><div id="progressBar"></div></div>
-  <div id="analysisStatus" class="status-box">
-   Select a geography and run the index analysis.
-  </div>
+<hr>
 
-  <div class="section-title">Map display</div>
+<h3>3. DATA SOURCES</h3>
+<p class="note">
+Administrative boundaries: Census_EAs_Geo.json hosted in the public GitHub repository.
+</p>
+<p class="note">
+Satellite imagery: Esri Sentinel-2 ImageServer. Imagery is requested dynamically for the current map extent.
+</p>
 
-  <label>Basemap</label>
-  <select id="basemapSelect">
-   <option value="HYBRID">HYBRID</option>
-   <option value="SATELLITE">SATELLITE</option>
-   <option value="ROADMAP">ROADMAP</option>
-   <option value="TERRAIN">TERRAIN</option>
-  </select>
+<button id="exportBtn" class="secondary">EXPORT SELECTED AREA CSV</button>
 
-  <label class="check-row"><input type="checkbox" id="showBoundary" checked> Show selected boundary</label>
-  <label class="check-row"><input type="checkbox" id="showMask" checked> Mask outside selected area</label>
-
-  <div class="section-title">Index formula</div>
-  <div class="small-note" id="formulaText">NDVI = (B08 − B04) / (B08 + B04)</div>
-
-  <div class="small-note">
-   Index statistics are calculated from available Sentinel-2 raster pixels sampled inside the selected Census boundary. Census population and household attributes are not used in the index charts.
-  </div>
-
- </div>
 </section>
 
-<!-- CENTRE: MAP -->
-<section class="panel map-panel">
- <div class="panel-heading">INTERACTIVE MAP | GAMBIA</div>
- <div class="map-toolbar">
-  <button class="secondary" id="fullGambiaBtn">Full Gambia</button>
- </div>
- <div class="map-container">
-  <div id="map"></div>
-  <div class="map-status" id="mapStatus">Load Census JSON to activate geography selection.</div>
- </div>
+<!-- ======================================================
+     CENTRE COLUMN: MAP
+====================================================== -->
+<section class="map-panel">
+<div id="map"></div>
 </section>
 
-<!-- RIGHT: INDEX ANALYTICS -->
+<!-- ======================================================
+     RIGHT COLUMN: ANALYTICS
+====================================================== -->
 <section class="panel">
- <div class="panel-heading">SELECTED INDEX | ANALYTICS</div>
- <div class="panel-body">
 
-  <div class="section-title">Selected index profile</div>
-  <div id="indexTitle" style="font-size:14px;font-weight:bold;color:#1769aa;margin-bottom:10px">NDVI – Vegetation Index</div>
+<h3>SELECTED AREA STATISTICS</h3>
 
-  <div class="kpi-grid">
-   <div class="kpi"><div class="name">Mean index value</div><div class="value" id="kpiMean">—</div><div class="unit">Raster pixel mean</div></div>
-   <div class="kpi"><div class="name">Minimum value</div><div class="value" id="kpiMin">—</div><div class="unit">Observed pixels</div></div>
-   <div class="kpi"><div class="name">Maximum value</div><div class="value" id="kpiMax">—</div><div class="unit">Observed pixels</div></div>
-   <div class="kpi"><div class="name">Standard deviation</div><div class="value" id="kpiStd">—</div><div class="unit">Pixel variability</div></div>
-   <div class="kpi"><div class="name">Valid raster samples</div><div class="value" id="kpiSamples">—</div><div class="unit">Sampled pixels</div></div>
-   <div class="kpi"><div class="name">Selected area</div><div class="value" id="kpiArea">—</div><div class="unit">Square kilometres</div></div>
-  </div>
+<div class="kpi-grid">
 
-  <div class="section-title">Index value distribution</div>
-  <div class="chart-box"><canvas id="distributionChart"></canvas></div>
+<div class="kpi">
+<small>Boundary features</small>
+<strong id="statFeatures">0</strong>
+</div>
 
-  <div class="section-title">Index classification</div>
-  <div class="chart-box"><canvas id="classChart"></canvas></div>
+<div class="kpi">
+<small>Enumeration areas</small>
+<strong id="statEAs">0</strong>
+</div>
 
-  <div class="section-title">Class area summary</div>
-  <div id="classSummary" class="status-box">Run an index analysis to calculate class distribution.</div>
+<div class="kpi">
+<small>Total selected area</small>
+<strong id="statArea">0 km²</strong>
+</div>
 
-  <div class="section-title">Index interpretation</div>
-  <div id="interpretation" class="status-box">Select an index and run the analysis.</div>
+<div class="kpi">
+<small>Average feature area</small>
+<strong id="statAverage">0 km²</strong>
+</div>
 
-  <div class="section-title">Index legend</div>
-  <div id="indexLegend" class="legend"></div>
+<div class="kpi wide">
+<small>Selected geographical area</small>
+<strong id="statLocation">All available boundaries</strong>
+</div>
 
-  <div class="section-title">Analysis information</div>
-  <div id="sourceInfo" class="small-note">No raster analysis has been completed.</div>
+<div class="kpi wide">
+<small>Selected satellite product</small>
+<strong id="statIndex">NDVI — Vegetation health</strong>
+</div>
 
-  <div class="button-row">
-   <button class="secondary" id="exportCsvBtn">Export statistics CSV</button>
-  </div>
+</div>
 
- </div>
+<hr>
+
+<h3>SELECTED INDEX DESCRIPTION</h3>
+<div class="description" id="indexDescription">
+NDVI measures the spectral contrast between near-infrared and red reflectance. It is commonly used to assess vegetation greenness.
+</div>
+
+<h4>INDEX FORMULA</h4>
+<div class="description" id="indexFormula">
+(NIR - Red) / (NIR + Red)
+</div>
+
+<h4>INDEX INTERPRETATION</h4>
+<div id="indexInterpretation" class="note">
+Select an index to display its interpretation.
+</div>
+
+<hr>
+
+<h3>INDEX INTERPRETATION CHART</h3>
+<div class="chart-box tall">
+<canvas id="indexChart"></canvas>
+</div>
+<p class="chart-caption" id="indexChartCaption">
+Reference interpretation ranges, not measured pixel values from the selected area.
+</p>
+
+<hr>
+
+<h3>SELECTED AREA FEATURE CHART</h3>
+<div class="chart-box">
+<canvas id="featureChart"></canvas>
+</div>
+<p class="chart-caption">
+Number of boundary features in the selected area, grouped by the available administrative attribute.
+</p>
+
+<hr>
+
+<h3>DYNAMIC MAP LEGEND</h3>
+<div id="dynamicLegend"></div>
+
+<hr>
+
+<h3>SPATIAL METHODOLOGY</h3>
+<p class="note">
+1. The administrative boundary JSON is retrieved directly from GitHub.
+</p>
+<p class="note">
+2. Region, LGA, district, ward and enumeration area filters identify the selected boundary features.
+</p>
+<p class="note">
+3. The map is zoomed to the selected geography.
+</p>
+<p class="note">
+4. Sentinel-2 imagery is requested using the selected raster function.
+</p>
+<p class="note">
+5. A polygon mask visually hides the imagery outside the selected boundary.
+</p>
+<p class="note">
+6. Boundary area statistics are calculated from the selected polygon geometries.
+</p>
+
+<hr>
+
+<h3>DATA LIMITATIONS</h3>
+<p class="note">
+The ImageServer layer provides rendered satellite imagery. This dashboard does not calculate pixel-level mean, minimum, maximum, standard deviation, index-class area or zonal statistics. The index chart shows reference interpretation ranges, not measured results for the selected AOI.
+</p>
+<p class="note">
+Sentinel-2 has no thermal bands. Land Surface Temperature requires a thermal satellite product such as MODIS or Landsat.
+</p>
+
+<hr>
+
+<h3>CREDITS</h3>
+<p class="note">
+<strong>Produced by:</strong> Ansu Singhateh<br>
+GIS Analyst<br>
+GIS / Cartography Unit<br>
+Gambia Bureau of Statistics (GBoS)
+</p>
+<p class="note">
+Administrative data: Census_EAs_Geo.json, GitHub repository.
+</p>
+<p class="note">
+Satellite imagery: Sentinel-2, Esri ImageServer, European Commission, ESA and AWS.
+</p>
+<p class="note">
+Basemap attribution: OpenStreetMap, Esri and OpenTopoMap, according to selected basemap.
+</p>
+<p class="note">
+GBoS GEOAI • Research and educational use.
+</p>
+
 </section>
-
 </main>
 
 <footer>
- <span>Produced by Ansu Singhateh | GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics</span>
- <span>SILKYSINGZ GEOAI • Research and educational use</span>
+Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+GBoS GEOAI • Research and educational use
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
 <script>
-/* =========================================================
-   1. GLOBAL STATE
-========================================================= */
+// ============================================================
+// 1. CONFIGURATION
+// ============================================================
+
+const JSON_URL =
+"https://raw.githubusercontent.com/silkysingz94-oss/URBAN-HEAT-ISLAND-INTELLIGENCE/main/Census_EAs_Geo.json";
+
+const SENTINEL_URL =
+"https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer";
+
+const FIELD_ALIASES={
+ region:["RCO","region","regionname","region_name","admin1"],
+ lga:["lganame","lga","lga_name","localgovernmentarea","admin2"],
+ district:["distname","district","districtname","district_name","admin3"],
+ ward:["wardname","ward","ward_name","admin4"],
+ ea:["feacode","fea_code","eaname","ea_name","enumerationarea","ea","ea_code"]
+};
+
+// ============================================================
+// 2. INDEX METADATA
+// ============================================================
+
+const INDEX_INFO={
+
+ndvi:{
+ title:"NDVI — Vegetation health",
+ raster:"NDVI Colormap",
+ formula:"(NIR - Red) / (NIR + Red)",
+ description:"The Normalized Difference Vegetation Index measures the contrast between near-infrared and red reflectance. It is commonly used to assess vegetation greenness, canopy density and vegetation condition.",
+ meaning:"Higher positive values generally indicate greener vegetation. Values near zero may indicate sparse vegetation, bare surfaces or built-up land. Negative values can indicate water or other non-vegetated surfaces.",
+ min:-1,max:1,
+ classes:[
+  {label:"Water / very low vegetation",range:"-1.00 to 0.00",value:-0.5,color:"#2563eb"},
+  {label:"Bare / sparse vegetation",range:"0.00 to 0.20",value:0.1,color:"#d6b36a"},
+  {label:"Low vegetation",range:"0.20 to 0.40",value:0.3,color:"#d9e78b"},
+  {label:"Moderate vegetation",range:"0.40 to 0.60",value:0.5,color:"#65a765"},
+  {label:"Dense vegetation",range:"0.60 to 1.00",value:0.8,color:"#166534"}
+ ]
+},
+
+ndviRaw:{
+ title:"NDVI — Raw values",
+ raster:"NDVI Raw",
+ formula:"(NIR - Red) / (NIR + Red)",
+ description:"Raw NDVI provides the numerical normalized difference between Sentinel-2 near-infrared and red reflectance.",
+ meaning:"Interpret values using the NDVI reference ranges. Raw values are not automatically classified into land-cover categories.",
+ min:-1,max:1,
+ classes:[
+  {label:"Very low",range:"-1.00 to 0.00",value:-0.5,color:"#2563eb"},
+  {label:"Sparse",range:"0.00 to 0.20",value:0.1,color:"#d6b36a"},
+  {label:"Low",range:"0.20 to 0.40",value:0.3,color:"#d9e78b"},
+  {label:"Moderate",range:"0.40 to 0.60",value:0.5,color:"#65a765"},
+  {label:"High",range:"0.60 to 1.00",value:0.8,color:"#166534"}
+ ]
+},
+
+ndwi:{
+ title:"NDWI — Water index",
+ raster:"NDWI Raw",
+ formula:"(Green - NIR) / (Green + NIR)",
+ description:"The Normalized Difference Water Index uses green and near-infrared reflectance to highlight water-related spectral responses.",
+ meaning:"Positive values may indicate water, while lower or negative values commonly occur over vegetation, bare soil and built-up surfaces. Local conditions affect interpretation.",
+ min:-1,max:1,
+ classes:[
+  {label:"Strong negative response",range:"-1.00 to -0.20",value:-0.6,color:"#b45309"},
+  {label:"Low / mixed response",range:"-0.20 to 0.00",value:-0.1,color:"#d6b36a"},
+  {label:"Weak positive response",range:"0.00 to 0.20",value:0.1,color:"#93c5fd"},
+  {label:"Moderate positive response",range:"0.20 to 0.40",value:0.3,color:"#3b82f6"},
+  {label:"Strong positive response",range:"0.40 to 1.00",value:0.7,color:"#082f80"}
+ ]
+},
+
+ndbi:{
+ title:"NDBI — Built-up areas",
+ raster:"Normalized Difference Built-Up Index (NDBI)",
+ formula:"(SWIR - NIR) / (SWIR + NIR)",
+ description:"The Normalized Difference Built-Up Index contrasts short-wave infrared and near-infrared reflectance to highlight built-up spectral responses.",
+ meaning:"Higher positive values can be associated with built-up or bare surfaces. The index is not a definitive building classifier because dry soil and other surfaces can have similar responses.",
+ min:-1,max:1,
+ classes:[
+  {label:"Strong negative",range:"-1.00 to -0.20",value:-0.6,color:"#2563eb"},
+  {label:"Low response",range:"-0.20 to 0.00",value:-0.1,color:"#93c5fd"},
+  {label:"Near neutral",range:"0.00 to 0.10",value:0.05,color:"#d1d5db"},
+  {label:"Moderate positive",range:"0.10 to 0.30",value:0.2,color:"#f59e0b"},
+  {label:"High positive",range:"0.30 to 1.00",value:0.65,color:"#b91c1c"}
+ ]
+},
+
+ndmi:{
+ title:"NDMI — Moisture condition",
+ raster:"NDMI Colorized",
+ formula:"(NIR - SWIR) / (NIR + SWIR)",
+ description:"The Normalized Difference Moisture Index is used to examine vegetation water content and moisture-related conditions using near-infrared and short-wave infrared reflectance.",
+ meaning:"Higher values generally suggest greater vegetation moisture. Lower values may indicate reduced moisture, dry vegetation or exposed surfaces.",
+ min:-1,max:1,
+ classes:[
+  {label:"Very dry response",range:"-1.00 to -0.30",value:-0.65,color:"#a16207"},
+  {label:"Dry response",range:"-0.30 to 0.00",value:-0.15,color:"#eab308"},
+  {label:"Moderate moisture",range:"0.00 to 0.20",value:0.1,color:"#bef264"},
+  {label:"High moisture",range:"0.20 to 0.40",value:0.3,color:"#4ade80"},
+  {label:"Very high moisture",range:"0.40 to 1.00",value:0.7,color:"#15803d"}
+ ]
+},
+
+ndre:{
+ title:"NDRE — Red-edge vegetation",
+ raster:"NDVI - with VRE Raw",
+ formula:"(NIR - Red Edge) / (NIR + Red Edge)",
+ description:"The red-edge vegetation index uses Sentinel-2 red-edge and near-infrared information. It can provide sensitivity to vegetation condition and chlorophyll-related changes.",
+ meaning:"Higher positive values generally indicate stronger vegetation response. Interpretation depends on vegetation type, season and canopy condition.",
+ min:-1,max:1,
+ classes:[
+  {label:"Low response",range:"-1.00 to 0.00",value:-0.5,color:"#b45309"},
+  {label:"Sparse response",range:"0.00 to 0.20",value:0.1,color:"#eab308"},
+  {label:"Moderate response",range:"0.20 to 0.40",value:0.3,color:"#a3e635"},
+  {label:"Good response",range:"0.40 to 0.60",value:0.5,color:"#4ade80"},
+  {label:"Strong response",range:"0.60 to 1.00",value:0.8,color:"#166534"}
+ ]
+},
+
+ndviVre:{
+ title:"NDVI — Red-edge only",
+ raster:"NDVI - VRE only Raw",
+ formula:"Red-edge vegetation index (service-defined)",
+ description:"This service product uses red-edge information to provide an alternative vegetation response layer.",
+ meaning:"Use the service's raw output and local validation to interpret vegetation response. Do not assume it is identical to conventional NDVI.",
+ min:-1,max:1,
+ classes:[
+  {label:"Low response",range:"-1.00 to 0.00",value:-0.5,color:"#b45309"},
+  {label:"Sparse response",range:"0.00 to 0.20",value:0.1,color:"#eab308"},
+  {label:"Moderate response",range:"0.20 to 0.40",value:0.3,color:"#a3e635"},
+  {label:"Good response",range:"0.40 to 0.60",value:0.5,color:"#4ade80"},
+  {label:"Strong response",range:"0.60 to 1.00",value:0.8,color:"#166534"}
+ ]
+},
+
+nbr:{
+ title:"NBR — Burn ratio",
+ raster:"Normalized Burn Ratio",
+ formula:"(NIR - SWIR2) / (NIR + SWIR2)",
+ description:"The Normalized Burn Ratio contrasts near-infrared and short-wave infrared reflectance. It is used to support burn-related surface assessment.",
+ meaning:"Lower values may be associated with burned or sparsely vegetated surfaces, while higher values can indicate healthier vegetation. Burn severity requires suitable pre-fire and post-fire comparison.",
+ min:-1,max:1,
+ classes:[
+  {label:"Very low response",range:"-1.00 to -0.25",value:-0.625,color:"#7f1d1d"},
+  {label:"Low response",range:"-0.25 to 0.10",value:-0.075,color:"#dc6b32"},
+  {label:"Moderate response",range:"0.10 to 0.27",value:0.185,color:"#eab308"},
+  {label:"High response",range:"0.27 to 0.44",value:0.355,color:"#84cc16"},
+  {label:"Very high response",range:"0.44 to 1.00",value:0.72,color:"#166534"}
+ ]
+},
+
+ndwiVre:{
+ title:"NDWI — Red-edge version",
+ raster:"NDWI - with VRE Raw",
+ formula:"Service-defined red-edge water index",
+ description:"This product uses red-edge information in a water-related spectral index. Its response should be interpreted according to the service definition and local conditions.",
+ meaning:"The chart is a general normalized-index reference only. Do not treat it as a universal water threshold.",
+ min:-1,max:1,
+ classes:[
+  {label:"Strong negative",range:"-1.00 to -0.20",value:-0.6,color:"#b45309"},
+  {label:"Low response",range:"-0.20 to 0.00",value:-0.1,color:"#d6b36a"},
+  {label:"Positive response",range:"0.00 to 0.30",value:0.15,color:"#60a5fa"},
+  {label:"Higher response",range:"0.30 to 0.60",value:0.45,color:"#2563eb"},
+  {label:"Strong response",range:"0.60 to 1.00",value:0.8,color:"#082f80"}
+ ]
+},
+
+agricultureDRA:{
+ title:"Agriculture composite",
+ raster:"Agriculture with DRA",
+ formula:"Sentinel-2 multispectral composite",
+ description:"A multispectral composite designed to support visual interpretation of agricultural vegetation and land-surface patterns.",
+ meaning:"Colour appearance depends on band combinations and image stretch. It is not a direct crop classification or vegetation index.",
+ classes:[]
+},
+infraredDRA:{
+ title:"Colour infrared",
+ raster:"Color Infrared with DRA",
+ formula:"Sentinel-2 false-colour composite",
+ description:"A false-colour composite that enhances vegetation-related spectral response and helps distinguish vegetation from other surface types.",
+ meaning:"Colour is determined by the selected band combination and display stretch. It is not a measured vegetation index.",
+ classes:[]
+},
+swirDRA:{
+ title:"Short-wave infrared",
+ raster:"Short-wave Infrared with DRA",
+ formula:"Sentinel-2 SWIR composite",
+ description:"A composite using short-wave infrared information, useful for examining moisture-related surface differences, vegetation and exposed land.",
+ meaning:"Interpret visual differences in context. This composite does not itself produce a numerical moisture statistic.",
+ classes:[]
+},
+geologyDRA:{
+ title:"Geology composite",
+ raster:"Geology with DRA",
+ formula:"Sentinel-2 multispectral composite",
+ description:"A multispectral display designed to help distinguish geological and surface-material patterns.",
+ meaning:"This is a visual interpretation product, not a geological map or validated lithological classification.",
+ classes:[]
+},
+naturalDRA:{
+ title:"Sentinel-2 true colour",
+ raster:"Natural Color with DRA",
+ formula:"Visible red, green and blue composite",
+ description:"A natural-colour satellite image designed to approximate how the landscape appears to the human eye.",
+ meaning:"Useful for visual interpretation of settlements, vegetation, water and land cover.",
+ classes:[]
+},
+bathymetricDRA:{
+ title:"Bathymetric composite",
+ raster:"Bathymetric with DRA",
+ formula:"Sentinel-2 multispectral composite",
+ description:"A composite designed to support visual interpretation of shallow-water and coastal spectral patterns.",
+ meaning:"It is not a direct water-depth measurement or a validated bathymetric survey.",
+ classes:[]
+},
+natural:{
+ title:"Natural colour — fixed stretch",
+ raster:"Natural Color",
+ formula:"Visible red, green and blue composite",
+ description:"Natural-colour Sentinel-2 imagery using the service's fixed display stretch.",
+ meaning:"Visual interpretation product; not a numerical index.",
+ classes:[]
+},
+agriculture:{
+ title:"Agriculture — fixed stretch",
+ raster:"Agriculture",
+ formula:"Sentinel-2 multispectral composite",
+ description:"Agricultural visualisation using a fixed service stretch.",
+ meaning:"Visual interpretation product; not a crop-type classification.",
+ classes:[]
+},
+geology:{
+ title:"Geology — fixed stretch",
+ raster:"Geology",
+ formula:"Sentinel-2 multispectral composite",
+ description:"Geological visualisation using a fixed service stretch.",
+ meaning:"Visual interpretation product; not a geological survey.",
+ classes:[]
+},
+swir:{
+ title:"Short-wave infrared — fixed stretch",
+ raster:"Short-wave Infrared",
+ formula:"Sentinel-2 SWIR composite",
+ description:"Short-wave infrared visualisation using a fixed service stretch.",
+ meaning:"Visual interpretation product; not a numerical moisture measurement.",
+ classes:[]
+},
+infrared:{
+ title:"Colour infrared — fixed stretch",
+ raster:"Color Infrared",
+ formula:"Sentinel-2 false-colour composite",
+ description:"Colour infrared visualisation using a fixed service stretch.",
+ meaning:"Visual interpretation product; not a numerical vegetation index.",
+ classes:[]
+}
+};
+
+// ============================================================
+// 3. MAP AND BASEMAP
+// ============================================================
+
+const map=L.map("map",{
+ center:[13.45,-15.45],
+ zoom:8
+});
+
+const baseLayers={
+ street:L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {maxZoom:19,attribution:"© OpenStreetMap"}
+ ),
+ satellite:L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19,attribution:"Esri World Imagery"}
+ ),
+ terrain:L.tileLayer(
+  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  {maxZoom:17,attribution:"© OpenTopoMap"}
+ )
+};
+
+let activeBasemap=baseLayers.street.addTo(map);
+
+// ============================================================
+// 4. APPLICATION STATE
+// ============================================================
+
+let allFeatures=[];
+let filteredFeatures=[];
+let detectedFields={};
+
+let boundaryLayer=null;
+let sentinelLayer=null;
+let maskLayer=null;
+
+let currentBounds=null;
+let refreshTimer=null;
+
+let indexChart=null;
+let featureChart=null;
+let isApplyingArea=false;
+
+// ============================================================
+// 5. GENERAL HELPERS
+// ============================================================
 
 const $=id=>document.getElementById(id);
 
-let censusData=null;
-let allFeatures=[];
-let selectedFeatures=[];
-let selectedGeoJSON=null;
-let boundaryLayer=null;
-let maskLayer=null;
-let baseLayer=null;
-let distributionChart=null;
-let classChart=null;
-let latestAnalysis=null;
-let cancelRequested=false;
-
-/* =========================================================
-   2. MAP AND BASEMAP
-========================================================= */
-
-const map=L.map("map").setView([13.45,-15.45],8);
-
-map.createPane("maskPane");
-map.getPane("maskPane").style.zIndex=600;
-map.createPane("boundaryPane");
-map.getPane("boundaryPane").style.zIndex=650;
-
-const baseLayers={
- ROADMAP:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}),
- SATELLITE:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"© Esri"}),
- TERRAIN:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"})
-};
-
-function setBasemap(name){
- if(baseLayer)map.removeLayer(baseLayer);
- baseLayer=baseLayers[name==="HYBRID"?"SATELLITE":name]||baseLayers.ROADMAP;
- baseLayer.addTo(map);
-
- if(name==="HYBRID"){
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-   maxZoom:19,opacity:.4
-  }).addTo(map);
- }
-}
-setBasemap("HYBRID");
-
-/* =========================================================
-   3. JSON BOUNDARY NORMALISATION
-   Accepts:
-   - GeoJSON FeatureCollection stored in a .json file
-   - GeoJSON Feature
-   - Array of Feature objects
-   - Object with features array
-   - ArcGIS JSON FeatureSet with polygon rings
-   - JSON records with geometry or coordinates
-   - JSON records with latitude/longitude point coordinates
-========================================================= */
-
-function normaliseKey(s){
- return String(s??"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function text(id,value){
+ $(id).textContent=value;
 }
 
-function parseGeometryValue(value){
- if(!value)return null;
- if(typeof value==="string"){
-  try{return JSON.parse(value)}catch(e){return null}
- }
- return value;
+function normaliseKey(value){
+ return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
 }
 
-function convertArcGISGeometry(g,spatialReference){
- if(!g)return null;
-
- const wkid=Number(
-  spatialReference?.latestWkid||
-  spatialReference?.wkid||
-  g.spatialReference?.latestWkid||
-  g.spatialReference?.wkid||
-  4326
+function getProperty(properties,field){
+ if(!properties||!field)return "";
+ const key=Object.keys(properties).find(
+  k=>normaliseKey(k)===normaliseKey(field)
  );
+ return key?properties[key]:"";
+}
 
- function transformPoint(x,y){
-  if(wkid===4326||wkid===4283)return [x,y];
-
-  if(wkid===3857){
-   return proj4("EPSG:3857","EPSG:4326",[x,y]);
-  }
-
-  if(wkid>=32601&&wkid<=32660){
-   return proj4("EPSG:"+wkid,"EPSG:4326",[x,y]);
-  }
-
-  if(wkid>=32701&&wkid<=32760){
-   return proj4("EPSG:"+wkid,"EPSG:4326",[x,y]);
-  }
-
-  return [x,y];
+function findField(properties,aliases){
+ if(!properties)return null;
+ for(const alias of aliases){
+  const key=Object.keys(properties).find(
+   k=>normaliseKey(k)===normaliseKey(alias)
+  );
+  if(key)return key;
  }
-
- function transformRing(ring){
-  return ring.map(p=>transformPoint(p[0],p[1]));
- }
-
- if(Array.isArray(g.rings)){
-  return {
-   type:"Polygon",
-   coordinates:g.rings.map(transformRing)
-  };
- }
-
- if(Array.isArray(g.x)&&Array.isArray(g.y)){
-  return null;
- }
-
- if(g.x!==undefined&&g.y!==undefined){
-  return {
-   type:"Point",
-   coordinates:transformPoint(Number(g.x),Number(g.y))
-  };
- }
-
- if(Array.isArray(g.paths)){
-  return {
-   type:"MultiLineString",
-   coordinates:g.paths.map(transformRing)
-  };
- }
-
  return null;
 }
 
-function convertRecordToFeature(record,rootSpatialReference){
- if(!record||typeof record!=="object")return null;
-
- if(record.type==="Feature"&&record.geometry){
-  return record;
- }
-
- const attributes=record.attributes||record.properties||record;
- let geometry=parseGeometryValue(record.geometry||record.Geometry||record.geom);
-
- if(geometry&&geometry.type==="Feature")return geometry;
-
- if(geometry&&!geometry.type&&geometry.rings){
-  geometry=convertArcGISGeometry(geometry,rootSpatialReference);
- }
-
- if(geometry&&!geometry.type&&geometry.coordinates){
-  geometry={
-   type:geometry.geometryType||"Polygon",
-   coordinates:geometry.coordinates
-  };
- }
-
- if(!geometry&&record.rings){
-  geometry=convertArcGISGeometry(record,rootSpatialReference);
- }
-
- if(!geometry&&record.coordinates){
-  const coords=parseGeometryValue(record.coordinates);
-  if(Array.isArray(coords)){
-   const geometryType=record.geometryType||record.geom_type||"Polygon";
-   geometry={type:geometryType,coordinates:coords};
+function uniqueValues(features,field){
+ const values=new Set();
+ features.forEach(f=>{
+  const v=getProperty(f.properties,field);
+  if(v!==null&&v!==undefined&&String(v).trim()!==""){
+   values.add(String(v).trim());
   }
- }
+ });
+ return [...values].sort((a,b)=>a.localeCompare(b,undefined,{
+  numeric:true,sensitivity:"base"
+ }));
+}
 
- if(!geometry){
-  const latitude=record.latitude??record.lat??record.LATITUDE??record.LAT;
-  const longitude=record.longitude??record.lon??record.lng??record.LONGITUDE??record.LON??record.LNG;
+function status(id,message,error=false){
+ $(id).textContent=message;
+ $(id).style.color=error?"#b91c1c":"#166534";
+}
 
-  if(latitude!==undefined&&longitude!==undefined){
-   geometry={
-    type:"Point",
-    coordinates:[Number(longitude),Number(latitude)]
-   };
-  }
- }
+// ============================================================
+// 6. JSON NORMALISATION
+// ============================================================
+
+function arcGISGeometryToGeoJSON(geometry){
 
  if(!geometry)return null;
 
- return {
-  type:"Feature",
-  properties:{...attributes},
-  geometry:geometry
- };
-}
+ if(geometry.rings){
 
-function normaliseJSON(data){
- if(!data||typeof data!=="object"){
-  throw Error("The JSON file is empty or invalid.");
- }
+  const points=geometry.rings.flat();
 
- let sourceFeatures=[];
- const spatialReference=data.spatialReference||data.crs?.properties||null;
-
- if(data.type==="FeatureCollection"&&Array.isArray(data.features)){
-  sourceFeatures=data.features;
- }else if(data.type==="Feature"){
-  sourceFeatures=[data];
- }else if(Array.isArray(data)){
-  sourceFeatures=data;
- }else if(Array.isArray(data.features)){
-  sourceFeatures=data.features;
- }else if(Array.isArray(data.records)){
-  sourceFeatures=data.records;
- }else if(Array.isArray(data.data)){
-  sourceFeatures=data.data;
- }else if(Array.isArray(data.results)){
-  sourceFeatures=data.results;
- }else if(Array.isArray(data.items)){
-  sourceFeatures=data.items;
- }else{
-  throw Error(
-   "JSON was read, but no features, records, data or results array was found."
+  const geographic=points.every(
+   p=>Math.abs(p[0])<=180&&Math.abs(p[1])<=90
   );
- }
 
- const features=sourceFeatures.map(f=>
-  convertRecordToFeature(f,spatialReference)
- ).filter(f=>
-  f&&f.geometry&&
-  ["Polygon","MultiPolygon","Point","MultiLineString","LineString"].includes(f.geometry.type)
- );
-
- if(!features.length){
-  throw Error(
-   "JSON loaded, but no usable geometry was detected. The file needs boundary coordinates, such as Polygon coordinates or ArcGIS rings."
-  );
- }
-
- return {type:"FeatureCollection",features};
-}
-
-/* =========================================================
-   4. JSON LOADING
-========================================================= */
-
-function setDataStatus(message,type=""){
- $("dataStatus").textContent=message;
- $("dataStatus").className="status-box"+(type?" "+type:"");
-}
-
-function setHeaderStatus(message){
- $("headerStatus").textContent=message;
-}
-
-function loadParsedJSON(raw,sourceName){
- try{
-  const parsed=typeof raw==="string"?JSON.parse(raw):raw;
-  const normalised=normaliseJSON(parsed);
-  initialiseCensus(normalised,sourceName);
- }catch(error){
-  console.error(error);
-  setDataStatus("JSON processing error: "+error.message,"error");
-  setHeaderStatus("JSON format problem");
- }
-}
-
-function initialiseCensus(data,sourceName){
- censusData=data;
- allFeatures=data.features;
-
- console.log("JSON source:",sourceName);
- console.log("Feature count:",allFeatures.length);
- console.log("First feature properties:",allFeatures[0]?.properties);
- console.log("Detected property names:",Object.keys(allFeatures[0]?.properties||{}));
-
- enableSelectors();
- populateRegions();
-
- selectedFeatures=allFeatures.slice();
- selectedGeoJSON={
-  type:"FeatureCollection",
-  features:selectedFeatures
- };
-
- refreshMap();
- resetAnalysisDisplay();
-
- setDataStatus(
-  "Successfully loaded "+allFeatures.length.toLocaleString()+
-  " boundary features from "+sourceName+".",
-  "good"
- );
-
- setHeaderStatus("JSON data loaded");
-}
-
-async function loadJSONFromURL(){
- const url=$("jsonUrl").value.trim();
-
- if(!url){
-  setDataStatus("Enter a public JSON URL first, or upload the JSON file.","error");
-  return;
- }
-
- try{
-  setDataStatus("Fetching JSON from the supplied URL...");
-  setHeaderStatus("Loading JSON...");
-
-  const response=await fetch(url,{
-   method:"GET",
-   mode:"cors",
-   cache:"no-store"
-  });
-
-  if(!response.ok){
-   throw Error("HTTP "+response.status+" – the URL did not return a successful response.");
+  if(!geographic){
+   throw new Error(
+    "ArcGIS JSON coordinates are projected. Please export the boundaries as WGS84 (EPSG:4326)."
+   );
   }
 
-  const text=await response.text();
-
-  let parsed;
-  try{
-   parsed=JSON.parse(text);
-  }catch(e){
-   throw Error("The URL returned a response, but it is not valid JSON.");
-  }
-
-  loadParsedJSON(parsed,url);
-
- }catch(error){
-  console.error(error);
-  setDataStatus(
-   "URL loading failed: "+error.message+
-   " Use the Upload JSON file button or enter the exact public GitHub Raw URL.",
-   "error"
-  );
-  setHeaderStatus("Waiting for JSON");
- }
-}
-
-function uploadJSONFile(file){
- if(!file)return;
-
- const reader=new FileReader();
-
- setDataStatus("Reading JSON file: "+file.name+"...");
-
- reader.onload=()=>{
-  loadParsedJSON(reader.result,file.name);
- };
-
- reader.onerror=()=>{
-  setDataStatus("Could not read the selected file.","error");
- };
-
- reader.readAsText(file);
-}
-
-$("loadUrlBtn").addEventListener("click",loadJSONFromURL);
-
-$("uploadBtn").addEventListener("click",()=>{
- $("fileInput").click();
-});
-
-$("fileInput").addEventListener("change",e=>{
- uploadJSONFile(e.target.files[0]);
-});
-
-/* =========================================================
-   5. CENSUS PROPERTY DETECTION
-========================================================= */
-
-function getProperty(feature,aliases){
- const props=feature?.properties||{};
- const keys=Object.keys(props);
-
- for(const alias of aliases){
-  const found=keys.find(k=>normaliseKey(k)===normaliseKey(alias));
-  if(found!==undefined&&props[found]!==null&&props[found]!==""){
-   return props[found];
-  }
- }
- return "";
-}
-
-function regionOf(f){
- return String(getProperty(f,["RCO","region","regionname","region_name"])||"Unknown");
-}
-
-function lgaOf(f){
- return String(getProperty(f,["lganame","lga","lga_name"])||"Unknown");
-}
-
-function districtOf(f){
- return String(getProperty(f,["distname","district","districtname"])||"Unknown");
-}
-
-function wardOf(f){
- return String(getProperty(f,["wardname","ward","ward_name"])||"Unknown");
-}
-
-function eaOf(f){
- return String(getProperty(f,["eaname","feacode","ea","ea_code","fea_code"])||"Unknown");
-}
-
-/* =========================================================
-   6. CASCADING SELECTORS
-========================================================= */
-
-function enableSelectors(){
- ["regionSelect","lgaSelect","districtSelect","wardSelect","eaSelect"]
-  .forEach(id=>$(id).disabled=false);
-}
-
-function setOptions(id,values,placeholder){
- const el=$(id);
- const old=el.value;
-
- el.innerHTML="";
-
- const first=document.createElement("option");
- first.value="";
- first.textContent=placeholder;
- el.appendChild(first);
-
- const unique=[...new Set(values
-  .map(v=>String(v))
-  .filter(v=>v&&v!=="Unknown")
- )].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
- unique.forEach(value=>{
-  const option=document.createElement("option");
-  option.value=value;
-  option.textContent=value;
-  el.appendChild(option);
- });
-
- if(unique.includes(old))el.value=old;
-}
-
-function populateRegions(){
- setOptions("regionSelect",allFeatures.map(regionOf),"All regions");
- populateLGAs();
-}
-
-function populateLGAs(){
- const region=$("regionSelect").value;
- const features=allFeatures.filter(f=>!region||regionOf(f)===region);
- setOptions("lgaSelect",features.map(lgaOf),"All LGAs");
- populateDistricts();
-}
-
-function populateDistricts(){
- const region=$("regionSelect").value;
- const lga=$("lgaSelect").value;
-
- const features=allFeatures.filter(f=>
-  (!region||regionOf(f)===region)&&
-  (!lga||lgaOf(f)===lga)
- );
-
- setOptions("districtSelect",features.map(districtOf),"All districts");
- populateWards();
-}
-
-function populateWards(){
- const region=$("regionSelect").value;
- const lga=$("lgaSelect").value;
- const district=$("districtSelect").value;
-
- const features=allFeatures.filter(f=>
-  (!region||regionOf(f)===region)&&
-  (!lga||lgaOf(f)===lga)&&
-  (!district||districtOf(f)===district)
- );
-
- setOptions("wardSelect",features.map(wardOf),"All wards");
- populateEAs();
-}
-
-function populateEAs(){
- const region=$("regionSelect").value;
- const lga=$("lgaSelect").value;
- const district=$("districtSelect").value;
- const ward=$("wardSelect").value;
-
- const features=allFeatures.filter(f=>
-  (!region||regionOf(f)===region)&&
-  (!lga||lgaOf(f)===lga)&&
-  (!district||districtOf(f)===district)&&
-  (!ward||wardOf(f)===ward)
- );
-
- setOptions("eaSelect",features.map(eaOf),"All enumeration areas");
-}
-
-$("regionSelect").addEventListener("change",populateLGAs);
-$("lgaSelect").addEventListener("change",populateDistricts);
-$("districtSelect").addEventListener("change",populateWards);
-$("wardSelect").addEventListener("change",populateEAs);
-
-function selectedLabel(){
- return [
-  $("regionSelect").value,
-  $("lgaSelect").value,
-  $("districtSelect").value,
-  $("wardSelect").value,
-  $("eaSelect").value
- ].filter(Boolean).join(" / ")||"All Gambia";
-}
-
-function filterGeography(){
- const region=$("regionSelect").value;
- const lga=$("lgaSelect").value;
- const district=$("districtSelect").value;
- const ward=$("wardSelect").value;
- const ea=$("eaSelect").value;
-
- return allFeatures.filter(f=>
-  (!region||regionOf(f)===region)&&
-  (!lga||lgaOf(f)===lga)&&
-  (!district||districtOf(f)===district)&&
-  (!ward||wardOf(f)===ward)&&
-  (!ea||eaOf(f)===ea)
- );
-}
-
-/* =========================================================
-   7. APPLY AND RESET GEOGRAPHY
-========================================================= */
-
-$("applyBtn").addEventListener("click",()=>{
- if(!censusData){
-  setDataStatus("Load your JSON boundary file before selecting a geography.","error");
-  return;
- }
-
- selectedFeatures=filterGeography();
-
- if(!selectedFeatures.length){
-  setDataStatus("No features match the selected geography.","error");
-  return;
- }
-
- refreshMap();
- resetAnalysisDisplay();
-
- setDataStatus(
-  selectedFeatures.length.toLocaleString()+
-  " features selected: "+selectedLabel(),
-  "good"
- );
-});
-
-$("resetBtn").addEventListener("click",()=>{
- if(!censusData)return;
-
- $("regionSelect").value="";
- populateRegions();
-
- $("lgaSelect").value="";
- populateDistricts();
-
- $("districtSelect").value="";
- populateWards();
-
- $("wardSelect").value="";
- populateEAs();
-
- $("eaSelect").value="";
-
- selectedFeatures=allFeatures.slice();
-
- refreshMap();
- resetAnalysisDisplay();
- setDataStatus("Geography reset to all available features.","good");
-});
-
-/* =========================================================
-   8. SELECTED GEOGRAPHY MAP
-========================================================= */
-
-function refreshMap(){
- if(boundaryLayer)map.removeLayer(boundaryLayer);
- if(maskLayer)map.removeLayer(maskLayer);
-
- boundaryLayer=null;
- maskLayer=null;
-
- if(!selectedFeatures.length)return;
-
- selectedGeoJSON={
-  type:"FeatureCollection",
-  features:selectedFeatures
- };
-
- if($("showMask").checked){
-  try{
-   const world=turf.polygon([[[-180,-85],[180,-85],[180,85],[-180,85],[-180,-85]]]);
-   const union=turf.union(selectedGeoJSON);
-   const difference=turf.difference(turf.featureCollection([world,union]));
-
-   if(difference){
-    maskLayer=L.geoJSON(difference,{
-     pane:"maskPane",
-     style:{
-      color:"#fff",
-      weight:0,
-      fillColor:"#f7f9fc",
-      fillOpacity:.78,
-      interactive:false
-     }
-    }).addTo(map);
-   }
-  }catch(error){
-   console.warn("Outside mask could not be created:",error);
-  }
- }
-
- if($("showBoundary").checked){
-  boundaryLayer=L.geoJSON(selectedGeoJSON,{
-   pane:"boundaryPane",
-   style:{
-    color:"#00a6c7",
-    weight:2,
-    fillColor:"#1769aa",
-    fillOpacity:.05
-   },
-   onEachFeature:(feature,layer)=>{
-    layer.bindPopup(
-     "<b>"+escapeHTML(eaOf(feature))+"</b><br>"+
-     "Region: "+escapeHTML(regionOf(feature))+"<br>"+
-     "LGA: "+escapeHTML(lgaOf(feature))+"<br>"+
-     "District: "+escapeHTML(districtOf(feature))+"<br>"+
-     "Ward: "+escapeHTML(wardOf(feature))
-    );
-   }
-  }).addTo(map);
-
-  const bounds=boundaryLayer.getBounds();
-  if(bounds.isValid()){
-   map.fitBounds(bounds,{padding:[20,20],maxZoom:15});
-  }
- }
-
- $("mapStatus").textContent=
-  selectedLabel()+" • "+selectedFeatures.length.toLocaleString()+" features";
-}
-
-$("showBoundary").addEventListener("change",refreshMap);
-$("showMask").addEventListener("change",refreshMap);
-$("basemapSelect").addEventListener("change",e=>setBasemap(e.target.value));
-$("fullGambiaBtn").addEventListener("click",()=>map.setView([13.45,-15.45],8));
-
-/* =========================================================
-   9. INDEX DEFINITIONS
-========================================================= */
-
-const INDEX_INFO={
- ndvi:{
-  name:"NDVI – Vegetation Index",
-  formula:"(B08 − B04) / (B08 + B04)",
-  bands:["B08","B04"],
-  classes:[
-   {label:"Very low / bare",min:-1,max:.10},
-   {label:"Low vegetation",min:.10,max:.20},
-   {label:"Moderate vegetation",min:.20,max:.40},
-   {label:"High vegetation",min:.40,max:.60},
-   {label:"Very high vegetation",min:.60,max:1.01}
-  ],
-  interpretation:"Higher positive NDVI generally indicates denser green vegetation. Low or negative values may indicate bare surfaces, built-up areas, water or cloud contamination."
- },
- ndwi:{
-  name:"NDWI – Water Index",
-  formula:"(B03 − B08) / (B03 + B08)",
-  bands:["B03","B08"],
-  classes:[
-   {label:"Very low",min:-1,max:-.30},
-   {label:"Low",min:-.30,max:0},
-   {label:"Moderate",min:0,max:.20},
-   {label:"High water signal",min:.20,max:.40},
-   {label:"Very high water signal",min:.40,max:1.01}
-  ],
-  interpretation:"Positive NDWI values can indicate open water or wet surfaces. Negative values commonly indicate vegetation, soil and built-up surfaces."
- },
- ndmi:{
-  name:"NDMI – Moisture Index",
-  formula:"(B08 − B11) / (B08 + B11)",
-  bands:["B08","B11"],
-  classes:[
-   {label:"Very low moisture",min:-1,max:-.30},
-   {label:"Low moisture",min:-.30,max:0},
-   {label:"Moderate moisture",min:0,max:.20},
-   {label:"High moisture",min:.20,max:.40},
-   {label:"Very high moisture",min:.40,max:1.01}
-  ],
-  interpretation:"Higher NDMI values generally indicate greater vegetation or surface moisture. Low and negative values can indicate dry vegetation, bare soil or built-up surfaces."
- },
- ndbi:{
-  name:"NDBI – Built-up Index",
-  formula:"(B11 − B08) / (B11 + B08)",
-  bands:["B11","B08"],
-  classes:[
-   {label:"Very low",min:-1,max:-.30},
-   {label:"Low",min:-.30,max:0},
-   {label:"Moderate",min:0,max:.10},
-   {label:"Elevated built-up signal",min:.10,max:.30},
-   {label:"High built-up signal",min:.30,max:1.01}
-  ],
-  interpretation:"Positive NDBI values can indicate built-up or exposed surfaces. Bare soil can also produce positive values, so NDBI is not a definitive building map."
- },
- savi:{
-  name:"SAVI – Soil Adjusted Vegetation Index",
-  formula:"1.5 × (B08 − B04) / (B08 + B04 + 0.5)",
-  bands:["B08","B04"],
-  classes:[
-   {label:"Very low vegetation",min:-1,max:.10},
-   {label:"Low vegetation",min:.10,max:.20},
-   {label:"Moderate vegetation",min:.20,max:.40},
-   {label:"High vegetation",min:.40,max:.60},
-   {label:"Very high vegetation",min:.60,max:1.01}
-  ],
-  interpretation:"SAVI adjusts vegetation response for soil brightness. Higher values generally indicate more vegetation cover."
- },
- bsi:{
-  name:"BSI – Bare Soil Index",
-  formula:"((B11 + B04) − (B08 + B02)) / ((B11 + B04) + (B08 + B02))",
-  bands:["B11","B04","B08","B02"],
-  classes:[
-   {label:"Very low bare-soil signal",min:-1,max:-.20},
-   {label:"Low bare-soil signal",min:-.20,max:0},
-   {label:"Moderate bare-soil signal",min:0,max:.10},
-   {label:"High bare-soil signal",min:.10,max:.30},
-   {label:"Very high bare-soil signal",min:.30,max:1.01}
-  ],
-  interpretation:"Higher BSI values can indicate exposed soil or bare surfaces. Built-up materials may also produce elevated BSI values."
- }
-};
-
-/* =========================================================
-   10. ANALYSIS UTILITIES
-========================================================= */
-
-function setProgress(value){
- $("progressBar").style.width=Math.max(0,Math.min(100,value))+"%";
-}
-
-function setAnalysisStatus(message,type=""){
- $("analysisStatus").textContent=message;
- $("analysisStatus").className="status-box"+(type?" "+type:"");
-}
-
-function escapeHTML(value){
- return String(value).replace(/[&<>"']/g,c=>({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- })[c]);
-}
-
-function calculateStatistics(values){
- const sorted=[...values].sort((a,b)=>a-b);
- const n=values.length;
- const mean=values.reduce((a,b)=>a+b,0)/n;
- const variance=values.reduce((sum,v)=>sum+Math.pow(v-mean,2),0)/n;
-
- return {
-  mean,
-  min:sorted[0],
-  max:sorted[n-1],
-  std:Math.sqrt(variance),
-  median:sorted[Math.floor(n/2)],
-  p25:sorted[Math.floor((n-1)*.25)],
-  p75:sorted[Math.floor((n-1)*.75)]
- };
-}
-
-function classifyValues(values,classes,pixelArea){
- return classes.map(c=>{
-  const matching=values.filter(v=>v>=c.min&&v<c.max);
   return {
-   label:c.label,
-   count:matching.length,
-   area:matching.length*pixelArea,
-   percent:values.length?matching.length/values.length*100:0
+   type:"Polygon",
+   coordinates:geometry.rings
   };
- });
-}
-
-/* =========================================================
-   11. SENTINEL-2 PUBLIC STAC ACCESS
-========================================================= */
-
-const STAC_URL="https://planetarycomputer.microsoft.com/api/stac/v1/search";
-const SIGN_URL="https://planetarycomputer.microsoft.com/api/sas/v1/sign?href=";
-
-function getEPSG(item){
- const code=item.properties?.["proj:epsg"];
- return code?"EPSG:"+code:null;
-}
-
-async function searchSentinel(bounds){
- const body={
-  collections:["sentinel-2-l2a"],
-  bbox:bounds,
-  datetime:$("dateRange").value,
-  limit:50,
-  query:{
-   "eo:cloud_cover":{
-    lt:Number($("cloudLimit").value)
-   }
-  },
-  sortby:[
-   {field:"properties.eo:cloud_cover",direction:"asc"}
-  ]
- };
-
- const response=await fetch(STAC_URL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify(body)
- });
-
- if(!response.ok)throw Error("Sentinel-2 catalogue request failed: HTTP "+response.status);
-
- const result=await response.json();
-
- if(!result.features?.length){
-  throw Error("No Sentinel-2 scenes found for this geography and observation period.");
- }
-
- return result.features;
-}
-
-async function signAsset(href){
- const response=await fetch(SIGN_URL+encodeURIComponent(href));
-
- if(!response.ok){
-  throw Error("Unable to obtain public imagery access URL.");
- }
-
- const result=await response.json();
- return result.href||result.url||href;
-}
-
-/* =========================================================
-   12. RASTER READING
-========================================================= */
-
-async function readBand(item,band,epsg,bounds){
- const asset=item.assets?.[band];
-
- if(!asset?.href)throw Error("Missing Sentinel-2 band "+band);
-
- const signed=await signAsset(asset.href);
- const tiff=await GeoTIFF.fromUrl(signed);
- const image=await tiff.getImage();
-
- const rasterBounds=image.getBoundingBox();
- const projected=proj4("EPSG:4326",epsg,[
-  [bounds[0],bounds[1]],
-  [bounds[2],bounds[3]]
- ]);
-
- const minX=Math.max(rasterBounds[0],Math.min(projected[0][0],projected[1][0]));
- const minY=Math.max(rasterBounds[1],Math.min(projected[0][1],projected[1][1]));
- const maxX=Math.min(rasterBounds[2],Math.max(projected[0][0],projected[1][0]));
- const maxY=Math.min(rasterBounds[3],Math.max(projected[0][1],projected[1][1]));
-
- if(minX>=maxX||minY>=maxY){
-  throw Error("Selected area does not intersect this image tile.");
- }
-
- const width=image.getWidth();
- const height=image.getHeight();
- const resolution=image.getResolution();
- const origin=image.getOrigin();
-
- const x0=Math.max(0,Math.floor((minX-origin[0])/resolution[0]));
- const x1=Math.min(width,Math.ceil((maxX-origin[0])/resolution[0]));
- const y0=Math.max(0,Math.floor((minY-origin[1])/resolution[1]));
- const y1=Math.min(height,Math.ceil((maxY-origin[1])/resolution[1]));
-
- const values=await image.readRasters({
-  window:[x0,y0,x1,y1],
-  interleave:true
- });
-
- return {
-  values,width:x1-x0,height:y1-y0,
-  x0,y0,origin,resolution,
-  bounds:[minX,minY,maxX,maxY]
- };
-}
-
-function sampleAt(band,x,y){
- const col=Math.floor((x-band.origin[0])/band.resolution[0])-band.x0;
- const row=Math.floor((y-band.origin[1])/band.resolution[1])-band.y0;
-
- if(col<0||row<0||col>=band.width||row>=band.height)return null;
-
- return band.values[row*band.width+col];
-}
-
-function computeIndex(key,b){
- const x={};
-
- Object.keys(b).forEach(k=>{
-  x[k]=Number(b[k])/10000;
- });
-
- const ratio=(a,c)=>Math.abs(a+c)<0.000001?null:(a-c)/(a+c);
-
- if(key==="ndvi")return ratio(x.B08,x.B04);
- if(key==="ndwi")return ratio(x.B03,x.B08);
- if(key==="ndmi")return ratio(x.B08,x.B11);
- if(key==="ndbi")return ratio(x.B11,x.B08);
-
- if(key==="savi"){
-  const den=x.B08+x.B04+.5;
-  return den===0?null:1.5*(x.B08-x.B04)/den;
- }
-
- if(key==="bsi"){
-  const den=x.B11+x.B04+x.B08+x.B02;
-  return den===0?null:
-   ((x.B11+x.B04)-(x.B08+x.B02))/den;
  }
 
  return null;
 }
 
-function sampleSelectedArea(bands,features,key,epsg,sampleMetres){
- const geometry=turf.union({
-  type:"FeatureCollection",
-  features:features
- });
+function normaliseJSON(data){
 
- if(!geometry)throw Error("Could not combine selected Census geometries.");
+ if(data&&data.type==="FeatureCollection"&&Array.isArray(data.features)){
+  return data.features;
+ }
 
- const reference=bands.B08||bands.B04||bands.B03;
- const bounds=reference.bounds;
+ if(data&&data.type==="Feature"){
+  return [data];
+ }
 
- const pixelSize=Math.max(
-  sampleMetres,
-  Math.abs(reference.resolution[0])
- );
+ if(data&&Array.isArray(data.features)){
+  return data.features.map(item=>({
+   type:"Feature",
+   properties:item.properties||item.attributes||{},
+   geometry:item.geometry&&item.geometry.rings
+    ?arcGISGeometryToGeoJSON(item.geometry)
+    :item.geometry
+  }));
+ }
 
- const pixelArea=(pixelSize*pixelSize)/1000000;
- const values=[];
+ if(Array.isArray(data)){
+  if(data.every(f=>f&&f.type==="Feature"))return data;
 
- for(let y=bounds[1]+pixelSize/2;y<bounds[3];y+=pixelSize){
-  if(cancelRequested)return [];
-
-  for(let x=bounds[0]+pixelSize/2;x<bounds[2];x+=pixelSize){
-   const lonlat=proj4(epsg,"EPSG:4326",[x,y]);
-   const point=turf.point(lonlat);
-
-   if(!turf.booleanPointInPolygon(point,geometry))continue;
-
-   const bandValues={};
-   let valid=true;
-
-   for(const bandName of INDEX_INFO[key].bands){
-    const value=sampleAt(bands[bandName],x,y);
-
-    if(value===null||value===undefined||!Number.isFinite(Number(value))||Number(value)<=0){
-     valid=false;
-     break;
-    }
-
-    bandValues[bandName]=Number(value);
-   }
-
-   if(!valid)continue;
-
-   const index=computeIndex(key,bandValues);
-
-   if(index===null||!Number.isFinite(index)||index<-1.2||index>1.2)continue;
-
-   values.push(index);
+  if(data.every(f=>f&&f.geometry)){
+   return data.map(item=>({
+    type:"Feature",
+    properties:item.properties||item.attributes||{},
+    geometry:item.geometry.rings
+     ?arcGISGeometryToGeoJSON(item.geometry)
+     :item.geometry
+   }));
   }
  }
 
- return {values,pixelArea};
+ if(data&&Array.isArray(data.data))return normaliseJSON(data.data);
+ if(data&&Array.isArray(data.records))return normaliseJSON(data.records);
+
+ throw new Error(
+  "Unsupported JSON structure. Expected GeoJSON FeatureCollection or ArcGIS JSON FeatureSet."
+ );
 }
 
-/* =========================================================
-   13. RUN INDEX ANALYSIS
-========================================================= */
+// ============================================================
+// 7. LOAD BOUNDARIES FROM GITHUB
+// ============================================================
 
-function getGeometryBounds(features){
- return turf.bbox({
-  type:"FeatureCollection",
-  features:features
- });
-}
+async function loadBoundaries(){
 
-async function runAnalysis(){
- cancelRequested=false;
- latestAnalysis=null;
-
- if(!selectedFeatures.length){
-  setAnalysisStatus("Load JSON and select a geography first.","error");
-  return;
- }
-
- const key=$("layerSelect").value;
-
- if(!INDEX_INFO[key]){
-  setAnalysisStatus("Select a Sentinel-2 index for pixel analysis.","error");
-  return;
- }
-
- setProgress(5);
- setAnalysisStatus("Preparing selected Census geography...");
+ status("boundaryStatus","Downloading Census_EAs_Geo.json from GitHub...");
 
  try{
-  const bounds=getGeometryBounds(selectedFeatures);
 
-  setProgress(10);
-  setAnalysisStatus("Searching Sentinel-2 imagery...");
+  const response=await fetch(JSON_URL,{cache:"no-store"});
 
-  const items=await searchSentinel(bounds);
-
-  if(cancelRequested)return;
-
-  let selectedImage=null;
-  let lastError=null;
-
-  for(let i=0;i<items.length;i++){
-   if(cancelRequested)return;
-
-   const item=items[i];
-   const epsg=getEPSG(item);
-
-   if(!epsg)continue;
-
-   setProgress(15+Math.round(i/items.length*30));
-
-   try{
-    const bands={};
-
-    for(const band of INDEX_INFO[key].bands){
-     bands[band]=await readBand(item,band,epsg,bounds);
-    }
-
-    selectedImage={item,epsg,bands};
-    break;
-
-   }catch(error){
-    lastError=error;
-    console.warn("Scene skipped:",error);
-   }
+  if(!response.ok){
+   throw new Error("GitHub HTTP "+response.status);
   }
 
-  if(!selectedImage){
-   throw lastError||Error("No usable Sentinel-2 image was available for the selected area.");
+  const data=await response.json();
+
+  allFeatures=normaliseJSON(data).filter(f=>
+   f&&f.geometry&&f.properties
+  );
+
+  if(!allFeatures.length){
+   throw new Error("No valid boundary features found.");
   }
 
-  if(cancelRequested)return;
+  detectFields();
 
-  setProgress(60);
-  setAnalysisStatus("Sampling pixels inside the selected boundary...");
+  initialiseSelectors();
 
-  const sampled=sampleSelectedArea(
-   selectedImage.bands,
-   selectedFeatures,
-   key,
-   selectedImage.epsg,
-   Number($("sampleLimit").value)
+  $("applyAreaBtn").disabled=false;
+
+  status(
+   "boundaryStatus",
+   "Loaded "+allFeatures.length.toLocaleString()+
+   " boundary features from GitHub."
   );
 
-  if(cancelRequested)return;
-
-  if(!sampled.values||sampled.values.length<5){
-   throw Error("Fewer than five valid raster samples were found. Try a larger geography, a different year or a higher cloud threshold.");
-  }
-
-  setProgress(80);
-  setAnalysisStatus("Calculating index statistics and classification...");
-
-  const values=sampled.values;
-  const stats=calculateStatistics(values);
-  const classes=classifyValues(
-   values,
-   INDEX_INFO[key].classes,
-   sampled.pixelArea
-  );
-
-  const area=selectedFeatures.reduce((sum,f)=>{
-   try{return sum+turf.area(f)}catch(e){return sum}
-  },0)/1000000;
-
-  latestAnalysis={
-   index:key,
-   name:INDEX_INFO[key].name,
-   formula:INDEX_INFO[key].formula,
-   statistics:stats,
-   classes,
-   values,
-   area,
-   sampleCount:values.length,
-   pixelArea:sampled.pixelArea,
-   scene:selectedImage.item.id,
-   datetime:selectedImage.item.properties?.datetime||"Not reported",
-   cloud:selectedImage.item.properties?.["eo:cloud_cover"]??"Not reported",
-   period:$("dateRange").value
-  };
-
-  updateAnalytics(latestAnalysis);
-
-  $("sourceInfo").innerHTML=
-   "Source: Microsoft Planetary Computer – Sentinel-2 L2A"+
-   "<br>Scene: "+escapeHTML(latestAnalysis.scene)+
-   "<br>Date: "+escapeHTML(latestAnalysis.datetime)+
-   "<br>Cloud cover: "+escapeHTML(String(latestAnalysis.cloud))+"%"+
-   "<br>Sampling interval: "+$("sampleLimit").value+" m"+
-   "<br>Geography: "+escapeHTML(selectedLabel())+
-   "<br>Statistics calculated from sampled image pixels.";
-
-  $("mapStatus").textContent=
-   latestAnalysis.name+" • "+values.length.toLocaleString()+" samples";
-
-  setProgress(100);
-  setAnalysisStatus(
-   "Analysis completed. "+values.length.toLocaleString()+
-   " raster pixels sampled inside the selected area.",
-   "good"
-  );
+  runAnalysis();
 
  }catch(error){
+
   console.error(error);
-  setProgress(0);
-  setAnalysisStatus("Analysis failed: "+error.message,"error");
-  $("sourceInfo").textContent="No valid raster statistics were produced.";
+
+  status(
+   "boundaryStatus",
+   "Boundary loading error: "+error.message,
+   true
+  );
  }
 }
 
-/* =========================================================
-   14. ANALYTICS CHARTS
-========================================================= */
+// ============================================================
+// 8. DETECT ADMINISTRATIVE FIELDS
+// ============================================================
 
-function updateAnalytics(result){
- const s=result.statistics;
+function detectFields(){
 
- $("indexTitle").textContent=result.name;
- $("formulaText").textContent=result.formula;
- $("kpiMean").textContent=s.mean.toFixed(4);
- $("kpiMin").textContent=s.min.toFixed(4);
- $("kpiMax").textContent=s.max.toFixed(4);
- $("kpiStd").textContent=s.std.toFixed(4);
- $("kpiSamples").textContent=result.sampleCount.toLocaleString();
- $("kpiArea").textContent=result.area.toFixed(2);
+ const sample=allFeatures.find(f=>f.properties);
 
- $("interpretation").textContent=INDEX_INFO[result.index].interpretation;
+ if(!sample)throw new Error("No feature properties found.");
 
- renderDistributionChart(result.values);
- renderClassChart(result.classes);
+ detectedFields={};
 
- $("classSummary").innerHTML=result.classes.map(c=>
-  "<b>"+escapeHTML(c.label)+"</b><br>"+
-  "Area: "+c.area.toFixed(3)+" km² | "+
-  "Pixels: "+c.count.toLocaleString()+" | "+
-  c.percent.toFixed(1)+"%<br><br>"
- ).join("");
-
- const colours=["#b8d6a2","#74b77b","#319b72","#1675a5","#594d9a"];
-
- $("indexLegend").innerHTML=result.classes.map((c,i)=>
-  '<span><i class="swatch" style="background:'+colours[i]+'"></i>'+
-  escapeHTML(c.label)+'</span>'
- ).join("");
-}
-
-function renderDistributionChart(values){
- if(distributionChart)distributionChart.destroy();
-
- const min=-1,max=1,bins=20;
- const counts=new Array(bins).fill(0);
- const labels=[];
-
- for(let i=0;i<bins;i++){
-  labels.push((min+i*(max-min)/bins).toFixed(2));
- }
-
- values.forEach(value=>{
-  let index=Math.floor((value-min)/(max-min)*bins);
-  index=Math.max(0,Math.min(bins-1,index));
-  counts[index]++;
+ Object.keys(FIELD_ALIASES).forEach(level=>{
+  detectedFields[level]=findField(
+   sample.properties,
+   FIELD_ALIASES[level]
+  );
  });
 
- distributionChart=new Chart($("distributionChart"),{
-  type:"bar",
-  data:{
-   labels,
-   datasets:[{
-    label:"Raster pixel count",
-    data:counts,
-    backgroundColor:"#1769aa",
-    borderRadius:2
-   }]
-  },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{display:false}},
-   scales:{
-    x:{title:{display:true,text:"Index value"},ticks:{font:{size:8},maxTicksLimit:10}},
-    y:{beginAtZero:true,title:{display:true,text:"Pixel count"},ticks:{font:{size:9}}}
-   }
+ console.log("Detected fields:",detectedFields);
+
+ if(!detectedFields.region&&!detectedFields.lga){
+  throw new Error(
+   "Could not identify Region or LGA fields in the JSON."
+  );
+ }
+
+ const hasPolygons=allFeatures.some(f=>
+  f.geometry.type==="Polygon"||f.geometry.type==="MultiPolygon"
+ );
+
+ if(!hasPolygons){
+  throw new Error("The JSON contains no polygon geometries.");
+ }
+}
+
+// ============================================================
+// 9. ADMINISTRATIVE SELECTORS
+// ============================================================
+
+const levels=["region","lga","district","ward","ea"];
+
+const selectorIds={
+ region:"regionSelect",
+ lga:"lgaSelect",
+ district:"districtSelect",
+ ward:"wardSelect",
+ ea:"eaSelect"
+};
+
+function getSelection(level){
+ return $(selectorIds[level]).value;
+}
+
+function filterBeforeLevel(features,stopLevel){
+
+ let result=features.slice();
+
+ for(const level of levels){
+
+  if(level===stopLevel)break;
+
+  const field=detectedFields[level];
+  const value=getSelection(level);
+
+  if(field&&value){
+   result=result.filter(f=>
+    String(getProperty(f.properties,field))===value
+   );
   }
- });
-}
-
-function renderClassChart(classes){
- if(classChart)classChart.destroy();
-
- classChart=new Chart($("classChart"),{
-  type:"bar",
-  data:{
-   labels:classes.map(c=>c.label),
-   datasets:[{
-    label:"Area (km²)",
-    data:classes.map(c=>c.area),
-    backgroundColor:["#b8d6a2","#74b77b","#319b72","#1675a5","#594d9a"],
-    borderRadius:3
-   }]
-  },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{display:false}},
-   scales:{
-    x:{ticks:{font:{size:9}}},
-    y:{beginAtZero:true,title:{display:true,text:"Area (km²)"},ticks:{font:{size:9}}}
-   }
-  }
- });
-}
-
-/* =========================================================
-   15. RESET INDEX ANALYTICS
-========================================================= */
-
-function resetAnalysisDisplay(){
- latestAnalysis=null;
-
- ["kpiMean","kpiMin","kpiMax","kpiStd","kpiSamples","kpiArea"]
-  .forEach(id=>$(id).textContent="—");
-
- $("classSummary").textContent="Run an index analysis for the selected geography.";
- $("interpretation").textContent="No index statistics available.";
- $("sourceInfo").textContent="No raster analysis has been completed.";
-
- setProgress(0);
- setAnalysisStatus("Geography or index changed. Run the analysis again.");
-
- if(distributionChart){
-  distributionChart.destroy();
-  distributionChart=null;
  }
 
- if(classChart){
-  classChart.destroy();
-  classChart=null;
- }
+ return result;
 }
 
-/* =========================================================
-   16. INDEX SELECTION
-========================================================= */
+function populateOneSelector(level,features){
 
-$("layerSelect").addEventListener("change",()=>{
- const key=$("layerSelect").value;
+ const select=$(selectorIds[level]);
+ const field=detectedFields[level];
+ const old=select.value;
 
- if(INDEX_INFO[key]){
-  $("indexTitle").textContent=INDEX_INFO[key].name;
-  $("formulaText").textContent=INDEX_INFO[key].formula;
-  $("interpretation").textContent=INDEX_INFO[key].interpretation;
-  resetAnalysisDisplay();
- }
-});
+ select.innerHTML="";
 
-$("runBtn").addEventListener("click",runAnalysis);
+ const labels={
+  region:"All regions",
+  lga:"All LGAs",
+  district:"All districts",
+  ward:"All wards",
+  ea:"All enumeration areas"
+ };
 
-$("cancelBtn").addEventListener("click",()=>{
- cancelRequested=true;
- setAnalysisStatus("Cancellation requested.","error");
-});
+ const option=document.createElement("option");
+ option.value="";
+ option.textContent=labels[level];
+ select.appendChild(option);
 
-/* =========================================================
-   17. CSV EXPORT
-========================================================= */
-
-$("exportCsvBtn").addEventListener("click",()=>{
- if(!latestAnalysis){
-  alert("Run an index analysis first.");
+ if(!field){
+  select.disabled=true;
   return;
  }
 
- const r=latestAnalysis;
+ const values=uniqueValues(features,field);
 
- const rows=[
-  ["Indicator","Value"],
-  ["Index",r.name],
-  ["Formula",r.formula],
-  ["Selected geography",selectedLabel()],
-  ["Observation period",r.period],
-  ["Mean",r.statistics.mean],
-  ["Minimum",r.statistics.min],
-  ["Maximum",r.statistics.max],
-  ["Standard deviation",r.statistics.std],
-  ["Median",r.statistics.median],
-  ["Valid raster samples",r.sampleCount],
-  ["Selected area km2",r.area],
-  [],
-  ["Classification","Pixel count","Area km2","Percentage"]
+ values.forEach(value=>{
+  const opt=document.createElement("option");
+  opt.value=value;
+  opt.textContent=value;
+  select.appendChild(opt);
+ });
+
+ select.disabled=values.length===0;
+
+ if(values.includes(old))select.value=old;
+}
+
+function populateSelectors(){
+
+ levels.forEach(level=>{
+  populateOneSelector(
+   level,
+   filterBeforeLevel(allFeatures,level)
+  );
+ });
+}
+
+function initialiseSelectors(){
+
+ levels.forEach(level=>{
+
+  $(selectorIds[level]).addEventListener("change",()=>{
+
+   const index=levels.indexOf(level);
+
+   for(let i=index+1;i<levels.length;i++){
+    $(selectorIds[levels[i]]).value="";
+   }
+
+   populateSelectors();
+  });
+
+ });
+
+ populateSelectors();
+}
+
+// ============================================================
+// 10. GET SELECTED FEATURES
+// ============================================================
+
+function getSelectedFeatures(){
+
+ let result=allFeatures.slice();
+
+ levels.forEach(level=>{
+
+  const field=detectedFields[level];
+  const value=getSelection(level);
+
+  if(field&&value){
+   result=result.filter(f=>
+    String(getProperty(f.properties,field))===value
+   );
+  }
+
+ });
+
+ return result;
+}
+
+// ============================================================
+// 11. GEOMETRY AND AREA STATISTICS
+// ============================================================
+
+function featureAreaKm2(feature){
+
+ try{
+  if(!window.turf)return 0;
+  return turf.area(feature)/1000000;
+ }catch(e){
+  console.warn("Area calculation failed:",e);
+  return 0;
+ }
+}
+
+function calculateAreaStatistics(features){
+
+ let totalArea=0;
+ let validAreas=0;
+
+ features.forEach(f=>{
+  const a=featureAreaKm2(f);
+  if(Number.isFinite(a)&&a>0){
+   totalArea+=a;
+   validAreas++;
+  }
+ });
+
+ const average=validAreas?totalArea/validAreas:0;
+
+ const eaField=detectedFields.ea;
+ const eaCount=eaField
+  ?uniqueValues(features,eaField).length
+  :0;
+
+ return {
+  totalArea,
+  average,
+  validAreas,
+  eaCount
+ };
+}
+
+// ============================================================
+// 12. SELECTED BOUNDARY DISPLAY
+// ============================================================
+
+function clearBoundaryLayers(){
+
+ if(boundaryLayer){
+  map.removeLayer(boundaryLayer);
+  boundaryLayer=null;
+ }
+
+ if(maskLayer){
+  map.removeLayer(maskLayer);
+  maskLayer=null;
+ }
+}
+
+function drawBoundary(features){
+
+ if(boundaryLayer){
+  map.removeLayer(boundaryLayer);
+ }
+
+ boundaryLayer=L.geoJSON(
+  {type:"FeatureCollection",features},
+  {
+   style:{
+    color:"#f59e0b",
+    weight:2,
+    opacity:1,
+    fillColor:"#f59e0b",
+    fillOpacity:0.035
+   },
+   onEachFeature:(feature,layer)=>{
+
+    const p=feature.properties||{};
+
+    const name=
+     getProperty(p,detectedFields.ea)||
+     getProperty(p,detectedFields.ward)||
+     getProperty(p,detectedFields.district)||
+     "Selected boundary";
+
+    layer.bindPopup(
+     "<b>"+String(name)+"</b>"
+    );
+   }
+  }
+ ).addTo(map);
+}
+
+// ============================================================
+// 13. MASK OUTSIDE SELECTED AREA
+// ============================================================
+
+function exteriorRings(geometry){
+
+ if(!geometry)return [];
+
+ if(geometry.type==="Polygon"){
+  return geometry.coordinates&&geometry.coordinates.length
+   ?[geometry.coordinates[0]]
+   :[];
+ }
+
+ if(geometry.type==="MultiPolygon"){
+  return geometry.coordinates
+   .filter(p=>p&&p.length)
+   .map(p=>p[0]);
+ }
+
+ return [];
+}
+
+function createMask(features){
+
+ if(maskLayer){
+  map.removeLayer(maskLayer);
+  maskLayer=null;
+ }
+
+ const holes=[];
+
+ features.forEach(f=>{
+  exteriorRings(f.geometry).forEach(ring=>{
+   if(ring&&ring.length>=4){
+    holes.push(ring.map(p=>[p[1],p[0]]));
+   }
+  });
+ });
+
+ if(!holes.length)return;
+
+ const world=[
+  [-89.9,-179.9],
+  [-89.9,179.9],
+  [89.9,179.9],
+  [89.9,-179.9],
+  [-89.9,-179.9]
  ];
 
- r.classes.forEach(c=>rows.push([
-  c.label,c.count,c.area,c.percent
- ]));
+ maskLayer=L.polygon(
+  [world,...holes],
+  {
+   stroke:false,
+   fillColor:"#ffffff",
+   fillOpacity:1,
+   fillRule:"evenodd",
+   interactive:false
+  }
+ ).addTo(map);
+}
 
- const csv=rows.map(row=>row.map(v=>
-  '"'+String(v??"").replace(/"/g,'""')+'"'
- ).join(",")).join("\n");
+// ============================================================
+// 14. INDEX INFORMATION PANEL
+// ============================================================
 
- const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+function updateIndexInformation(){
+
+ const key=$("layerSelect").value;
+ const info=INDEX_INFO[key];
+
+ if(!info)return;
+
+ text("statIndex",info.title);
+ text("indexDescription",info.description);
+ text("indexFormula",info.formula);
+ text("indexInterpretation",info.meaning);
+
+ updateIndexChart(info);
+ updateLegend(info);
+}
+
+// ============================================================
+// 15. INDEX CHART
+// Reference interpretation guide, not measured values
+// ============================================================
+
+function updateIndexChart(info){
+
+ const canvas=$("indexChart");
+
+ if(indexChart){
+  indexChart.destroy();
+  indexChart=null;
+ }
+
+ if(!info.classes||!info.classes.length){
+
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  $("indexChartCaption").textContent=
+   "This composite is a visual product and does not have a single normalized index scale.";
+
+  return;
+ }
+
+ $("indexChartCaption").textContent=
+  "Reference interpretation categories for "+info.title+
+  ". These are illustrative ranges, not pixel measurements or class areas for the selected boundary.";
+
+ indexChart=new Chart(canvas,{
+  type:"bar",
+  data:{
+   labels:info.classes.map(c=>c.label),
+   datasets:[{
+    label:"Reference class position",
+    data:info.classes.map(c=>c.value),
+    backgroundColor:info.classes.map(c=>c.color),
+    borderColor:info.classes.map(c=>c.color),
+    borderWidth:1,
+    borderRadius:4
+   }]
+  },
+  options:{
+   indexAxis:"y",
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{
+    legend:{display:false},
+    tooltip:{
+     callbacks:{
+      label:function(context){
+       const c=info.classes[context.dataIndex];
+       return "Reference range: "+c.range;
+      }
+     }
+    }
+   },
+   scales:{
+    x:{
+     min:info.min,
+     max:info.max,
+     title:{
+      display:true,
+      text:"Illustrative index position"
+     },
+     ticks:{font:{size:9}}
+    },
+    y:{
+     ticks:{font:{size:9}}
+    }
+   }
+  }
+ });
+}
+
+// ============================================================
+// 16. DYNAMIC INDEX LEGEND
+// ============================================================
+
+function updateLegend(info){
+
+ const box=$("dynamicLegend");
+ box.innerHTML="";
+
+ if(info.classes&&info.classes.length){
+
+  info.classes.forEach(c=>{
+
+   const row=document.createElement("div");
+   row.className="legend-row";
+
+   const swatch=document.createElement("span");
+   swatch.className="swatch";
+   swatch.style.background=c.color;
+
+   const label=document.createElement("span");
+   label.textContent=c.label+" ("+c.range+")";
+
+   row.appendChild(swatch);
+   row.appendChild(label);
+   box.appendChild(row);
+  });
+
+ }else{
+
+  const p=document.createElement("p");
+  p.className="note";
+  p.textContent=
+   "This is a multispectral colour composite. Its display colours are determined by the satellite service's band combination and stretch. There is no single numerical index legend.";
+  box.appendChild(p);
+ }
+}
+
+// ============================================================
+// 17. FEATURE CHART
+// ============================================================
+
+function updateFeatureChart(features){
+
+ if(featureChart){
+  featureChart.destroy();
+  featureChart=null;
+ }
+
+ const ctx=$("featureChart");
+
+ const field=
+  detectedFields.ward||
+  detectedFields.district||
+  detectedFields.lga||
+  detectedFields.region;
+
+ if(!field||!features.length)return;
+
+ const counts={};
+
+ features.forEach(f=>{
+  const value=String(getProperty(f.properties,field)||"Unknown");
+  counts[value]=(counts[value]||0)+1;
+ });
+
+ const sorted=Object.entries(counts)
+  .sort((a,b)=>b[1]-a[1])
+  .slice(0,10);
+
+ featureChart=new Chart(ctx,{
+  type:"bar",
+  data:{
+   labels:sorted.map(x=>x[0]),
+   datasets:[{
+    label:"Boundary features",
+    data:sorted.map(x=>x[1]),
+    backgroundColor:"#27835b",
+    borderRadius:4
+   }]
+  },
+  options:{
+   indexAxis:"y",
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{
+    legend:{display:false}
+   },
+   scales:{
+    x:{
+     beginAtZero:true,
+     ticks:{precision:0,font:{size:9}}
+    },
+    y:{
+     ticks:{font:{size:9}}
+    }
+   }
+  }
+ });
+}
+
+// ============================================================
+// 18. AREA STATISTICS AND CHARTS
+// ============================================================
+
+function updateStatistics(features){
+
+ const stats=calculateAreaStatistics(features);
+
+ text("statFeatures",features.length.toLocaleString());
+ text("statEAs",stats.eaCount.toLocaleString());
+ text("statArea",stats.totalArea.toFixed(2)+" km²");
+ text("statAverage",stats.average.toFixed(4)+" km²");
+
+ const parts=[];
+
+ levels.forEach(level=>{
+  const v=getSelection(level);
+  if(v)parts.push(v);
+ });
+
+ text(
+  "statLocation",
+  parts.length?parts.join(" → "):"All available boundaries"
+ );
+
+ updateFeatureChart(features);
+ updateIndexInformation();
+}
+
+// ============================================================
+// 19. SATELLITE IMAGE SERVICE
+// ============================================================
+
+function removeSatelliteLayer(){
+
+ if(sentinelLayer){
+  map.removeLayer(sentinelLayer);
+  sentinelLayer=null;
+ }
+}
+
+function loadSatellite(){
+
+ const info=INDEX_INFO[$("layerSelect").value];
+
+ if(!info)return;
+
+ if(!filteredFeatures.length){
+  status("imageStatus","No selected boundary features.",true);
+  return;
+ }
+
+ if(!L.esri||!L.esri.imageMapLayer){
+  status("imageStatus","Esri Leaflet library did not load.",true);
+  return;
+ }
+
+ status(
+  "imageStatus",
+  "Requesting "+info.title+" for the selected map extent..."
+ );
+
+ removeSatelliteLayer();
+
+ sentinelLayer=L.esri.imageMapLayer({
+  url:SENTINEL_URL,
+  renderingRule:{
+   rasterFunction:info.raster
+  },
+  format:"png32",
+  f:"image",
+  opacity:Number($("opacity").value)/100
+ });
+
+ sentinelLayer.on("loading",()=>{
+  status("imageStatus","Loading "+info.title+"...");
+ });
+
+ sentinelLayer.on("load",()=>{
+
+  createMask(filteredFeatures);
+
+  if(boundaryLayer){
+   boundaryLayer.bringToFront();
+  }
+
+  status(
+   "imageStatus",
+   "Image request completed: "+info.title+
+   ". The selected boundary mask has been applied."
+  );
+ });
+
+ sentinelLayer.on("error",error=>{
+
+  console.error("Sentinel ImageServer error:",error);
+
+  status(
+   "imageStatus",
+   "Image request failed. Inspect the browser console for the ImageServer response.",
+   true
+  );
+ });
+
+ sentinelLayer.addTo(map);
+}
+
+// ============================================================
+// 20. RUN SELECTED AREA ANALYSIS
+// ============================================================
+
+function runAnalysis(){
+
+ if(!allFeatures.length)return;
+
+ filteredFeatures=getSelectedFeatures();
+
+ if(!filteredFeatures.length){
+
+  status(
+   "boundaryStatus",
+   "No features match the selected administrative area.",
+   true
+  );
+
+  return;
+ }
+
+ isApplyingArea=true;
+
+ clearBoundaryLayers();
+
+ drawBoundary(filteredFeatures);
+
+ updateStatistics(filteredFeatures);
+
+ const bounds=boundaryLayer.getBounds();
+
+ if(bounds.isValid()){
+  currentBounds=bounds;
+
+  map.fitBounds(bounds,{
+   padding:[25,25],
+   maxZoom:14
+  });
+ }
+
+ setTimeout(()=>{
+
+  loadSatellite();
+
+  status(
+   "boundaryStatus",
+   filteredFeatures.length.toLocaleString()+
+   " selected boundary features displayed."
+  );
+
+  isApplyingArea=false;
+
+ },500);
+}
+
+// ============================================================
+// 21. CSV EXPORT
+// ============================================================
+
+function csvEscape(value){
+ const s=String(value??"");
+ return '"'+s.replace(/"/g,'""')+'"';
+}
+
+function exportSelectedCSV(){
+
+ if(!filteredFeatures.length){
+  alert("Select an area first.");
+  return;
+ }
+
+ const keys=[...new Set(
+  filteredFeatures.flatMap(f=>Object.keys(f.properties||{}))
+ )];
+
+ const rows=[
+  keys.map(csvEscape).join(",")
+ ];
+
+ filteredFeatures.forEach(f=>{
+  rows.push(
+   keys.map(k=>csvEscape(f.properties[k])).join(",")
+  );
+ });
+
+ const blob=new Blob(
+  ["\uFEFF"+rows.join("\r\n")],
+  {type:"text/csv;charset=utf-8"}
+ );
+
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
 
  a.href=url;
- a.download="GBoS_GEOAI_"+r.index+"_statistics.csv";
+ a.download="GBoS_Selected_Area_Boundaries.csv";
  a.click();
 
  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// 22. EVENT HANDLERS
+// ============================================================
+
+$("applyAreaBtn").addEventListener("click",runAnalysis);
+
+$("loadImageBtn").addEventListener("click",loadSatellite);
+
+$("layerSelect").addEventListener("change",()=>{
+
+ updateIndexInformation();
+ updateStatistics(filteredFeatures);
+
+ loadSatellite();
 });
 
-/* =========================================================
-   18. STARTUP
-========================================================= */
+$("baseSelect").addEventListener("change",function(){
 
-$("indexTitle").textContent=INDEX_INFO.ndvi.name;
-$("formulaText").textContent=INDEX_INFO.ndvi.formula;
-$("interpretation").textContent=INDEX_INFO.ndvi.interpretation;
+ map.removeLayer(activeBasemap);
+ activeBasemap=baseLayers[this.value];
+ activeBasemap.addTo(map);
+});
 
-setDataStatus(
- "Ready. Upload your Census JSON file or enter its public URL."
-);
+$("opacity").addEventListener("input",function(){
 
-setHeaderStatus("Waiting for Census JSON");
+ if(sentinelLayer){
+  sentinelLayer.setOpacity(Number(this.value)/100);
+ }
+});
+
+$("resetAreaBtn").addEventListener("click",()=>{
+
+ levels.forEach(level=>{
+  $(selectorIds[level]).value="";
+ });
+
+ populateSelectors();
+ runAnalysis();
+});
+
+$("resetMapBtn").addEventListener("click",()=>{
+
+ if(currentBounds&&currentBounds.isValid()){
+  map.fitBounds(currentBounds,{padding:[25,25]});
+ }else{
+  map.setView([13.45,-15.45],8);
+ }
+});
+
+$("exportBtn").addEventListener("click",exportSelectedCSV);
+
+// Redraw the Sentinel image for a changed map extent
+map.on("moveend",()=>{
+
+ text("statZoom",map.getZoom());
+
+ if(!sentinelLayer||isApplyingArea)return;
+
+ clearTimeout(refreshTimer);
+
+ refreshTimer=setTimeout(()=>{
+  if(sentinelLayer)sentinelLayer.redraw();
+ },700);
+});
+
+// ============================================================
+// 23. START APPLICATION
+// ============================================================
+
+updateIndexInformation();
+loadBoundaries();
 
 </script>
 </body>
